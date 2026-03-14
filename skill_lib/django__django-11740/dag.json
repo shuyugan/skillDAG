@@ -1,0 +1,160 @@
+{
+  "instance_id": "django__django-11740",
+  "skill_name": "Fix missing migration dependencies on altered relations",
+  "description": "Use this workflow when an ORM/migration system generates schema-change operations but fails to declare required ordering dependencies after a field is altered into a relationship (especially across modules/apps). It guides you from locating the dependency computation logic, reproducing the issue with a minimal state-diff test, implementing consistent dependency inference for altered fields, and validating with targeted and regression tests.",
+  "trigger_conditions": [
+    "A migration that alters a field into a relationship/reference does not include a dependency on the referenced module/app.",
+    "Runtime or migration-time failure indicates an unresolved related model/type after applying generated migrations.",
+    "Dependency behavior differs between “add field” and “alter field” operations for relational/reference fields.",
+    "A minimal reproduction shows empty or incomplete dependencies for a cross-module relationship change."
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "Identify where the migration/autogeneration engine computes operation dependencies and compare the code paths for creating new fields versus altering existing fields.",
+      "type": "intermediate"
+    },
+    {
+      "node_id": "S2",
+      "state": "Reproduce the issue in a minimal scenario by diffing pre-change vs post-change project/schema state where a non-relational field becomes a cross-module relational/reference field, and confirm missing dependencies in the generated operations.",
+      "type": "intermediate"
+    },
+    {
+      "node_id": "S3",
+      "state": "Determine the root cause by tracing how dependency inference is applied for new-field operations but omitted or not propagated for altered-field operations when relations are introduced or changed.",
+      "type": "intermediate"
+    },
+    {
+      "node_id": "S4",
+      "state": "Implement a patch so altered-field operations compute and attach relation-derived dependencies using the existing dependency inference utilities, ensuring consistent behavior with new-field operation generation.",
+      "type": "intermediate"
+    },
+    {
+      "node_id": "S5",
+      "state": "Validate the fix by rerunning the minimal reproduction and executing the relevant automated test suites, confirming dependencies are present and no regressions are introduced.",
+      "type": "terminal"
+    },
+    {
+      "node_id": "E1",
+      "state": "Tooling/command formatting prevents progress because multiple actions were bundled into a single execution request, blocking repository inspection.",
+      "type": "erroneous"
+    },
+    {
+      "node_id": "E2",
+      "state": "Task was prematurely marked complete without implementing a fix, performing investigation, or running validation tests.",
+      "type": "erroneous"
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start"
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "E1",
+      "to_node": "E2",
+      "type": "erroneous",
+      "thought": "Submitting completion after an execution/formatting failure prevents any real investigation or fix from occurring and guarantees the reported issue remains unresolved.",
+      "actions": "Do not finalize the task while blocked; first correct the execution approach and proceed with investigation, reproduction, implementation, and validation before attempting to complete.",
+      "errors": [
+        "Task was marked complete immediately after an execution/formatting failure despite no investigation, code changes, or tests being run.",
+        "Attempted to submit despite having made no code changes, performed no investigation, and run no tests."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "After locating the dependency-generation logic, you need a minimal failing reproduction to precisely observe the missing dependency output and to later verify the patch fixes it.",
+      "actions": "Construct a small pre/post schema-state diff where a scalar/non-relational field becomes a cross-module relational field; run the migration autogenerator and assert the resulting operation includes a dependency on the referenced module/app.",
+      "errors": [
+        "Reproduction check failed because the generated operation set did not include the expected dependency on the referenced module/app.",
+        "Generated output showed an empty dependency list for the module/app that introduced the relationship."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Understanding the discrepancy between new-field and altered-field paths is necessary to pinpoint where dependency inference is skipped or dropped.",
+      "actions": "Trace both generation paths and compare where relation/reference dependencies are computed, how they are represented, and how they are passed into operation construction/scheduling.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Once the missing dependency is confirmed, implement the fix by ensuring altered-field operations compute relation-derived dependencies and propagate them into the operation graph, matching the behavior of new-field operations.",
+      "actions": "Update the altered-field operation builder to detect relational/reference fields and invoke the same dependency inference used elsewhere; pass the resulting dependencies into the operation registration/scheduling mechanism.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S2",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "If the minimal reproduction now passes (or is expected to pass), run the broader test suite to ensure correctness across related scenarios and prevent regressions.",
+      "actions": "Execute the relevant unit/integration tests for migration autogeneration and dependency resolution; include cross-module relations and other representative cases covered by existing tests.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "After identifying the precise omission in the altered-field code path, apply a targeted change that adds the missing dependency computation and propagation for relational alterations.",
+      "actions": "Implement a minimal, consistent change to the altered-field generation logic to compute dependencies for the new field definition when it introduces/changes a relation and ensure those dependencies are attached to the resulting operation.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S4",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Re-running the minimal reproduction after the patch provides fast feedback that dependency inference now works for altered fields before spending time on broader test runs.",
+      "actions": "Re-execute the minimal state-diff reproduction and inspect the generated operations/dependency list to confirm the referenced module/app is now included as an explicit dependency.",
+      "errors": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After confirming the patch behavior locally, run the project’s official test runner and targeted suites to ensure the fix integrates correctly with the broader testing harness and doesn’t break unrelated behavior.",
+      "actions": "Use the repository’s standard test execution entrypoint to run the relevant migration/autogeneration tests; if an initial test invocation fails due to incorrect runner/module usage, switch to the supported test runner and rerun.",
+      "errors": [
+        "Attempted to run tests using an unsupported invocation which raised a ModuleNotFoundError; resolved by switching to the repository’s canonical test runner.",
+        "Initial test command failed with ModuleNotFoundError due to incorrect test runner usage; corrected by using the project-provided test execution script."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "__START__",
+      "to_node": "E1",
+      "type": "erroneous",
+      "thought": "Before inspecting code, commands must conform to the execution environment’s constraints; otherwise, investigation is blocked at the first step.",
+      "actions": "Issue a single, well-scoped execution request at a time (one command/action per execution block) to locate the relevant dependency/autogeneration logic without violating tool formatting rules.",
+      "errors": [
+        "Execution was blocked because multiple actions were provided in a single request and the environment requires exactly one action per triple-backticked command.",
+        "Environment rejected the request due to an improperly formatted multi-action command (expected exactly one action)."
+      ]
+    },
+    {
+      "edge_id": 10,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "The first step is to correctly locate the autogeneration/dependency code in the actual repository layout; incorrect paths waste time and can look like missing files.",
+      "actions": "Confirm the repository root and search within the correct source tree for the migration autogeneration and dependency computation modules; then focus on the new-field vs altered-field operation generation paths.",
+      "errors": [
+        "Searched for source files under an incorrect repository path, requiring discovery of the correct working directory before proceeding.",
+        "Initial commands targeted a non-existent path in the environment; corrected by locating the actual checkout directory and re-running the search."
+      ]
+    }
+  ]
+}
