@@ -1,11 +1,13 @@
 """Stage 4: Skill Constructor — generalization + end-to-end orchestrator.
 
 Orchestrates the full pipeline:
-  Stage 1  TrajectoryAnalyzer   (per-traj, N LLM calls)
-  Stage 2  StateCanonicalization (cross-traj, 1 LLM call)
-  Stage 3  GraphBuilder          (pure algorithm)
-  Stage 4  Language generalization (1 LLM call)
+  Stage 1   TrajectoryAnalyzer    (per-traj, N LLM calls)
+  Stage 2a  State Definition      (cross-traj, 1 LLM call)
+  Stage 2b  Per-Trajectory Mapping (per-traj, N LLM calls)
+  Stage 3   GraphBuilder           (pure algorithm)
+  Stage 4   Language generalization (1 LLM call)
 
+Total LLM calls: 2N + 2 (+1 if filtered trajectories exist for error feedback).
 Also provides construct_from_files for resuming from saved analyses.
 """
 
@@ -18,8 +20,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .graph_builder import GraphBuilder, RawEdge, RawNode, RawSkillGraph
-from .prompts import GRAPH_GENERALIZER_SYSTEM
+from .graph_builder import GraphBuilder, RawSkillGraph
+from .prompts import ERROR_FEEDBACK_SYSTEM, GRAPH_GENERALIZER_SYSTEM
 from .state_canonicalizer import StateCanonicalization
 from .trajectory_analyzer import TrajectoryAnalysis, TrajectoryAnalyzer
 from .trajectory_normalizer import TrajectoryNormalizer
@@ -34,9 +36,9 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Node:
-    node_id: str          # S1 / E1 style
+    node_id: str          # S1, S2, ... or __START__
     state: str
-    type: str             # start | intermediate | terminal | erroneous
+    type: str             # start | intermediate | terminal
     verification: list[str] = field(default_factory=list)
 
 
@@ -45,7 +47,7 @@ class Edge:
     edge_id: int
     from_node: str
     to_node: str
-    type: str             # normal | erroneous | rollback
+    type: str             # normal
     thought: str
     actions: str
     errors: list[str] = field(default_factory=list)
@@ -198,6 +200,27 @@ class SkillConstructor:
         instance_id = analyses[0].instance_id
         task = self._read_task(attempt_dirs[0])
 
+        # Filter out trajectories with no successful milestones
+        # (e.g., agent crashed on first step and gave up — no SWE skill info)
+        original_count = len(analyses)
+        filtered_out = [
+            a for a in analyses
+            if not any(m.outcome == "success" for m in a.milestones)
+        ]
+        analyses = [
+            a for a in analyses
+            if any(m.outcome == "success" for m in a.milestones)
+        ]
+        if filtered_out:
+            logger.info(
+                "filtered out %d trajectory(ies) with no successful milestones",
+                len(filtered_out),
+            )
+            if output_path is not None:
+                self._generate_error_feedback(filtered_out, output_path)
+        if not analyses:
+            raise ValueError("no trajectories with successful milestones remain after filtering")
+
         # Stage 2: cross-trajectory state canonicalization
         canon = StateCanonicalization(
             model=self.model, temperature=self.temperature, max_tokens=self.max_tokens,
@@ -273,14 +296,29 @@ class SkillConstructor:
             ],
         }
 
-        resp = call_llm(
-            json.dumps(payload, ensure_ascii=False, indent=2),
-            system=GRAPH_GENERALIZER_SYSTEM,
-            model=self.model,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-        )
-        data = extract_json(resp.content)
+        prompt_text = json.dumps(payload, ensure_ascii=False, indent=2)
+        last_err: Exception | None = None
+        data: dict = {}
+        for attempt in range(1, 3):
+            resp = call_llm(
+                prompt_text,
+                system=GRAPH_GENERALIZER_SYSTEM,
+                model=self.model,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+            try:
+                data = extract_json(resp.content)
+                if not isinstance(data, dict):
+                    raise ValueError("root must be a JSON object")
+                break
+            except (ValueError, json.JSONDecodeError) as err:
+                last_err = err
+                logger.warning(
+                    "generalization attempt %d/2 failed: %s", attempt, err,
+                )
+        else:
+            raise RuntimeError(f"generalization failed after retry: {last_err}")
 
         skill_name = str(data.get("skill_name", "Unnamed Skill")).strip()
         description = str(data.get("description", "")).strip()
@@ -338,6 +376,49 @@ class SkillConstructor:
             nodes=nodes,
             edges=edges,
         )
+
+    # ------------------------------------------------------------------
+    # Error Feedback (for filtered-out all-error trajectories)
+    # ------------------------------------------------------------------
+
+    def _generate_error_feedback(
+        self,
+        filtered: list[TrajectoryAnalysis],
+        output_path: str | Path,
+    ) -> None:
+        """Summarize common errors from all-error trajectories via one LLM call."""
+        # Build a compact representation of the failed milestones
+        lines: list[str] = []
+        for i, a in enumerate(filtered):
+            lines.append(f"Trajectory {i} (resolved={a.resolved}):")
+            for m in a.milestones:
+                ei = f" | error: {m.error_info.symptom}" if m.error_info else ""
+                lines.append(f"  M{m.milestone_id}: action=\"{m.action}\"{ei}")
+        prompt = "\n".join(lines)
+
+        try:
+            resp = call_llm(
+                prompt,
+                system=ERROR_FEEDBACK_SYSTEM,
+                model=self.model,
+                temperature=self.temperature,
+                max_tokens=2048,
+            )
+            data = extract_json(resp.content)
+            common_errors = [str(e).strip() for e in data.get("common_errors", []) if str(e).strip()]
+        except Exception as err:
+            logger.warning("error feedback generation failed: %s", err)
+            common_errors = []
+
+        feedback = {"common_errors": common_errors}
+        out = Path(output_path)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "error_feedback.json").write_text(
+            json.dumps(feedback, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        logger.info("error feedback saved: %d lessons from %d filtered trajectories",
+                     len(common_errors), len(filtered))
 
     # ------------------------------------------------------------------
     # IO helpers

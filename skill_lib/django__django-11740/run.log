@@ -101,3 +101,345 @@
 2026-03-13 18:22:42,623 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
 2026-03-13 18:22:42,626 INFO __main__: generalization done: skill_name=Fix missing migration dependencies on altered relations
 2026-03-13 18:22:42,627 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-14 17:29:38,494 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-14 17:29:38,496 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:29:51,268 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:29:51,284 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 17:29:51,286 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:30:02,053 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:02,057 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 4 milestones
+2026-03-14 17:30:02,059 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:30:09,204 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:09,207 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 17:30:09,210 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:30:20,628 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:20,634 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 4 milestones
+2026-03-14 17:30:20,636 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:30:26,167 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:26,170 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 17:30:26,171 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-14 17:30:37,431 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:37,433 INFO agents.state_canonicalizer: step 2a done: 9 canonical states defined
+2026-03-14 17:30:41,712 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:41,714 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-14 17:30:45,877 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:45,879 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (4 milestones)
+2026-03-14 17:30:48,630 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:48,632 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (2 milestones)
+2026-03-14 17:30:54,888 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:54,890 INFO agents.state_canonicalizer: step 2b: trajectory 3 mapped (4 milestones)
+2026-03-14 17:30:56,803 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:30:56,805 INFO agents.state_canonicalizer: step 2b: trajectory 4 mapped (2 milestones)
+2026-03-14 17:30:56,805 WARNING agents.state_canonicalizer: canonical states defined but unused: ['E3', 'S1']
+2026-03-14 17:30:56,806 INFO agents.state_canonicalizer: canonicalization done: 9 canonical states, 17 mappings
+2026-03-14 17:30:56,807 INFO agents.graph_builder: graph assembly started
+2026-03-14 17:30:56,807 WARNING agents.graph_builder: nodes with no incoming edges (not initial): ['E3', 'S1']
+2026-03-14 17:30:56,807 WARNING agents.graph_builder: nodes with no outgoing edges (not terminal/erroneous): ['S1']
+2026-03-14 17:30:56,807 INFO agents.graph_builder: graph assembly done: 10 nodes, 9 edges
+2026-03-14 17:30:56,808 INFO __main__: language generalization started
+2026-03-14 17:31:26,229 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:31:26,231 INFO __main__: generalization done: skill_name=Fix missing migration dependencies
+2026-03-14 17:31:26,233 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-14 17:49:32,477 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-14 17:49:32,478 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:49:46,364 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:49:46,380 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 17:49:46,382 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:49:58,352 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:49:58,355 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 17:49:58,357 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:50:04,275 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:04,279 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 17:50:04,281 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:50:19,839 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:19,843 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-14 17:50:19,845 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 17:50:25,165 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:25,168 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 17:50:25,169 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-14 17:50:38,538 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:38,541 INFO agents.state_canonicalizer: step 2a done: 11 canonical states defined
+2026-03-14 17:50:42,122 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:42,123 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-14 17:50:46,340 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:46,342 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-14 17:50:50,423 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:50,425 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (2 milestones)
+2026-03-14 17:50:54,926 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:54,928 INFO agents.state_canonicalizer: step 2b: trajectory 3 mapped (6 milestones)
+2026-03-14 17:50:56,731 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:50:56,733 INFO agents.state_canonicalizer: step 2b: trajectory 4 mapped (2 milestones)
+2026-03-14 17:50:56,733 INFO agents.state_canonicalizer: removed 2 unused canonical state(s): ['E2', 'E3']
+2026-03-14 17:50:56,734 INFO agents.state_canonicalizer: canonicalization done: 9 canonical states, 20 mappings
+2026-03-14 17:50:56,734 INFO agents.graph_builder: graph assembly started
+2026-03-14 17:50:56,734 WARNING agents.graph_builder: nodes with no outgoing edges (not terminal/erroneous): ['S4']
+2026-03-14 17:50:56,734 INFO agents.graph_builder: graph assembly done: 10 nodes, 11 edges
+2026-03-14 17:50:56,735 INFO __main__: language generalization started
+2026-03-14 17:51:25,662 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 17:51:25,665 INFO __main__: generalization done: skill_name=Fix missing migration dependencies
+2026-03-14 17:51:25,666 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-14 18:03:44,316 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-14 18:03:44,318 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:03:56,424 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:03:56,440 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 4 milestones
+2026-03-14 18:03:56,442 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:04:08,281 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:08,284 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 4 milestones
+2026-03-14 18:04:08,286 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:04:14,896 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:14,899 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 18:04:14,902 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:04:26,555 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:26,558 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:04:26,559 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:04:32,060 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:32,063 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 18:04:32,063 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-14 18:04:44,070 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:44,072 INFO agents.state_canonicalizer: step 2a done: 9 canonical states defined
+2026-03-14 18:04:47,372 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:47,374 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (4 milestones)
+2026-03-14 18:04:50,445 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:50,447 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (4 milestones)
+2026-03-14 18:04:52,783 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:52,786 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (2 milestones)
+2026-03-14 18:04:56,405 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:56,408 INFO agents.state_canonicalizer: step 2b: trajectory 3 mapped (5 milestones)
+2026-03-14 18:04:58,164 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:04:58,165 INFO agents.state_canonicalizer: step 2b: trajectory 4 mapped (2 milestones)
+2026-03-14 18:04:58,166 INFO agents.state_canonicalizer: removed 1 unused canonical state(s): ['E2']
+2026-03-14 18:04:58,167 INFO agents.state_canonicalizer: canonicalization done: 8 canonical states, 17 mappings
+2026-03-14 18:04:58,167 INFO agents.graph_builder: graph assembly started
+2026-03-14 18:04:58,167 INFO agents.graph_builder: graph assembly done: 9 nodes, 10 edges
+2026-03-14 18:04:58,169 INFO __main__: language generalization started
+2026-03-14 18:05:29,072 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:05:29,074 INFO __main__: generalization done: skill_name=Fix missing migration dependencies on field alteration
+2026-03-14 18:05:29,076 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-14 18:12:29,138 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-14 18:12:29,139 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:12:43,447 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:12:43,463 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:12:43,465 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:12:56,628 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:12:56,631 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:12:56,633 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:13:03,964 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:13:03,967 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 18:13:03,969 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:13:16,335 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:13:16,337 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:13:16,338 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:13:22,964 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:13:22,969 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 18:13:22,970 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-14 18:13:34,274 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:13:34,276 INFO agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-14 18:13:37,865 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:13:37,867 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-14 18:13:42,061 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:13:42,063 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-14 18:13:44,156 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:15:59,230 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-14 18:15:59,232 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:16:11,867 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:16:11,882 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:16:11,884 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:16:23,172 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:16:23,175 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:16:23,177 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:16:29,323 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:16:29,326 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 18:16:29,328 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:16:42,002 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:16:42,005 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-14 18:16:42,006 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-14 18:16:47,527 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:16:47,535 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-14 18:16:47,536 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-14 18:17:00,898 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:00,901 INFO agents.state_canonicalizer: step 2a done: 10 canonical states defined
+2026-03-14 18:17:04,895 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:04,898 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-14 18:17:08,811 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:08,812 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-14 18:17:10,827 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:10,829 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (2 milestones)
+2026-03-14 18:17:16,204 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:16,206 INFO agents.state_canonicalizer: step 2b: trajectory 3 mapped (5 milestones)
+2026-03-14 18:17:17,994 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:17,996 INFO agents.state_canonicalizer: step 2b: trajectory 4 mapped (2 milestones)
+2026-03-14 18:17:17,997 INFO agents.state_canonicalizer: removed 1 unused canonical state(s): ['E3']
+2026-03-14 18:17:17,998 INFO agents.state_canonicalizer: canonicalization done: 9 canonical states, 19 mappings
+2026-03-14 18:17:17,998 INFO agents.graph_builder: graph assembly started
+2026-03-14 18:17:17,999 INFO agents.graph_builder: graph assembly done: 10 nodes, 11 edges
+2026-03-14 18:17:18,000 INFO __main__: language generalization started
+2026-03-14 18:17:46,769 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-14 18:17:46,771 INFO __main__: generalization done: skill_name=Fix missing migration dependencies
+2026-03-14 18:17:46,773 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-15 16:03:37,466 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-15 16:03:37,467 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-15 16:03:50,053 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:03:50,078 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-15 16:03:50,079 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-15 16:04:05,837 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:05,839 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-15 16:04:05,840 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-15 16:04:12,212 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:12,213 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-15 16:04:12,215 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-15 16:04:24,376 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:24,378 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 4 milestones
+2026-03-15 16:04:24,379 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-15 16:04:31,633 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:31,635 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-15 16:04:31,635 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-15 16:04:44,572 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:44,573 INFO agents.state_canonicalizer: step 2a done: 8 canonical states defined
+2026-03-15 16:04:51,265 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:51,267 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-15 16:04:55,904 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:55,905 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-15 16:04:57,801 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:04:57,802 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (2 milestones)
+2026-03-15 16:05:00,930 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:05:00,931 INFO agents.state_canonicalizer: step 2b: trajectory 3 mapped (4 milestones)
+2026-03-15 16:05:02,811 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:05:02,812 INFO agents.state_canonicalizer: step 2b: trajectory 4 mapped (2 milestones)
+2026-03-15 16:05:02,813 INFO agents.state_canonicalizer: canonicalization done: 8 canonical states, 18 mappings
+2026-03-15 16:05:02,813 INFO agents.graph_builder: graph assembly started
+2026-03-15 16:05:02,813 INFO agents.graph_builder: graph assembly done: 9 nodes, 11 edges
+2026-03-15 16:05:02,814 INFO __main__: language generalization started
+2026-03-15 16:05:32,461 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 16:05:32,462 INFO __main__: generalization done: skill_name=Fix Missing Migration Dependencies on Field Alter
+2026-03-15 16:05:32,463 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-16 13:29:18,565 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-16 13:29:18,566 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 13:29:35,288 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:29:35,295 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-16 13:29:35,296 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 13:29:45,656 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:29:45,657 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-16 13:29:45,658 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 13:29:52,632 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:29:52,634 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 13:29:52,636 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 13:30:02,884 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:30:02,886 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 4 milestones
+2026-03-16 13:30:02,887 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 13:30:09,612 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:30:09,613 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 13:30:09,614 INFO agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-16 13:30:19,586 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:30:19,588 INFO agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-16 13:30:27,054 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:30:27,055 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (6 milestones)
+2026-03-16 13:30:32,336 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 13:30:32,337 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-16 13:30:35,681 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:03:41,699 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-16 15:03:41,700 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:04:27,629 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-16 15:04:27,630 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:04:55,560 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-16 15:04:55,561 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:05:07,443 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:05:07,450 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 5 milestones
+2026-03-16 15:05:07,451 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:05:17,596 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:05:17,600 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-16 15:05:17,601 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:05:24,085 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:05:24,087 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 15:05:24,089 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:05:37,945 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:05:37,957 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 7 milestones
+2026-03-16 15:05:37,958 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:05:43,136 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:05:43,138 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 15:05:43,138 INFO __main__: filtered out 2 trajectory(ies) with no successful milestones
+2026-03-16 15:05:43,139 INFO agents.state_canonicalizer: state canonicalization started: 3 trajectories
+2026-03-16 15:05:56,380 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:05:56,382 INFO agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-16 15:06:01,527 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:06:01,528 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-16 15:06:06,690 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:06:06,691 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (6 milestones)
+2026-03-16 15:06:12,636 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:06:12,637 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (7 milestones)
+2026-03-16 15:06:12,638 INFO agents.state_canonicalizer: canonicalization done: 7 canonical states, 18 mappings
+2026-03-16 15:06:12,638 INFO agents.graph_builder: graph assembly started
+2026-03-16 15:06:12,638 INFO agents.graph_builder: graph assembly done: 8 nodes, 9 edges
+2026-03-16 15:06:12,639 INFO __main__: language generalization started
+2026-03-16 15:06:44,060 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:06:44,061 INFO __main__: generalization done: skill_name=Fix missing dependency on relation alteration
+2026-03-16 15:06:44,062 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-16 15:23:36,207 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-16 15:23:36,208 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:23:49,968 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:23:49,975 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-16 15:23:49,976 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:24:04,330 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:04,332 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-16 15:24:04,333 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:24:09,663 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:09,665 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 15:24:09,667 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:24:22,198 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:22,200 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 7 milestones
+2026-03-16 15:24:22,202 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 15:24:28,054 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:28,055 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 15:24:28,056 INFO __main__: filtered out 2 trajectory(ies) with no successful milestones
+2026-03-16 15:24:28,056 INFO agents.state_canonicalizer: state canonicalization started: 3 trajectories
+2026-03-16 15:24:41,601 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:41,608 INFO agents.state_canonicalizer: step 2a done: 8 canonical states defined
+2026-03-16 15:24:47,238 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:47,239 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (6 milestones)
+2026-03-16 15:24:52,782 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:52,783 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (6 milestones)
+2026-03-16 15:24:57,904 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:24:57,905 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (7 milestones)
+2026-03-16 15:24:57,905 INFO agents.state_canonicalizer: removed 1 unused canonical state(s): ['S7']
+2026-03-16 15:24:57,906 INFO agents.state_canonicalizer: canonicalization done: 7 canonical states, 19 mappings
+2026-03-16 15:24:57,906 INFO agents.graph_builder: graph assembly started
+2026-03-16 15:24:57,906 INFO agents.graph_builder: graph assembly done: 8 nodes, 10 edges
+2026-03-16 15:24:57,907 INFO __main__: language generalization started
+2026-03-16 15:25:27,626 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 15:25:27,627 INFO __main__: generalization done: skill_name=Fix Missing Migration Dependencies
+2026-03-16 15:25:27,628 INFO __main__: skill saved to skill_lib/django__django-11740
+2026-03-16 16:06:38,276 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-16 16:06:38,277 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 16:06:53,723 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:06:53,730 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-16 16:06:53,731 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 16:07:05,941 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:05,943 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 6 milestones
+2026-03-16 16:07:05,944 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 16:07:11,573 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:11,575 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 16:07:11,577 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 16:07:24,429 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:24,431 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 7 milestones
+2026-03-16 16:07:24,432 INFO agents.trajectory_analyzer: [django__django-11740] milestone extraction started
+2026-03-16 16:07:30,598 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:30,600 INFO agents.trajectory_analyzer: [django__django-11740] extraction done: 2 milestones
+2026-03-16 16:07:30,600 INFO __main__: filtered out 2 trajectory(ies) with no successful milestones
+2026-03-16 16:07:33,172 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:33,173 INFO __main__: error feedback saved: 3 lessons from 2 filtered trajectories
+2026-03-16 16:07:33,173 INFO agents.state_canonicalizer: state canonicalization started: 3 trajectories
+2026-03-16 16:07:47,916 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:47,917 INFO agents.state_canonicalizer: step 2a done: 8 canonical states defined
+2026-03-16 16:07:53,209 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:53,210 INFO agents.state_canonicalizer: step 2b: trajectory 0 mapped (6 milestones)
+2026-03-16 16:07:58,588 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:07:58,589 INFO agents.state_canonicalizer: step 2b: trajectory 1 mapped (6 milestones)
+2026-03-16 16:08:05,045 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:08:05,046 INFO agents.state_canonicalizer: step 2b: trajectory 2 mapped (7 milestones)
+2026-03-16 16:08:05,046 INFO agents.state_canonicalizer: removed 1 unused canonical state(s): ['S7']
+2026-03-16 16:08:05,047 INFO agents.state_canonicalizer: canonicalization done: 7 canonical states, 19 mappings
+2026-03-16 16:08:05,047 INFO agents.graph_builder: graph assembly started
+2026-03-16 16:08:05,047 INFO agents.graph_builder: graph assembly done: 8 nodes, 10 edges
+2026-03-16 16:08:05,048 INFO __main__: language generalization started
+2026-03-16 16:08:34,318 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 16:08:34,320 INFO __main__: generalization done: skill_name=Fix Missing Dependencies in Schema Diff
+2026-03-16 16:08:34,321 INFO __main__: skill saved to skill_lib/django__django-11740

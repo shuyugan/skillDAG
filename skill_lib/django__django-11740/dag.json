@@ -1,159 +1,181 @@
 {
   "instance_id": "django__django-11740",
-  "skill_name": "Fix missing migration dependencies on altered relations",
-  "description": "Use this workflow when an ORM/migration system generates schema-change operations but fails to declare required ordering dependencies after a field is altered into a relationship (especially across modules/apps). It guides you from locating the dependency computation logic, reproducing the issue with a minimal state-diff test, implementing consistent dependency inference for altered fields, and validating with targeted and regression tests.",
+  "skill_name": "Fix Missing Dependencies in Schema Diff",
+  "description": "Addresses bugs in schema-diff or migration/autogeneration systems where operations that alter existing definitions fail to include required ordering/dependency metadata (especially when introducing new references/relationships). Apply when an automatically generated change set executes in the wrong order or cannot resolve newly introduced references across modules/components.",
   "trigger_conditions": [
-    "A migration that alters a field into a relationship/reference does not include a dependency on the referenced module/app.",
-    "Runtime or migration-time failure indicates an unresolved related model/type after applying generated migrations.",
-    "Dependency behavior differs between “add field” and “alter field” operations for relational/reference fields.",
-    "A minimal reproduction shows empty or incomplete dependencies for a cross-module relationship change."
+    "Auto-generated change scripts fail at runtime due to unresolved references to a newly related/linked entity after an alteration.",
+    "Generated change operations differ in dependency behavior between “add” vs “alter” paths for the same kind of relationship.",
+    "Cross-module changes work when introduced as a new field/entity but break when introduced via modification of an existing field/entity.",
+    "Migration/order metadata is missing or incomplete for operations that introduce relationships during an alteration."
   ],
   "nodes": [
     {
       "node_id": "S1",
-      "state": "Identify where the migration/autogeneration engine computes operation dependencies and compare the code paths for creating new fields versus altering existing fields.",
-      "type": "intermediate"
+      "state": "Relevant code paths responsible for emitting change operations and attaching dependency/ordering metadata have been located and mapped.",
+      "type": "intermediate",
+      "verification": [
+        "The module(s) and function(s) responsible for emitting add-vs-alter operations in the change generator can be identified.",
+        "The specific place where dependency/ordering metadata is computed and attached (or omitted) in those code paths can be pointed to."
+      ]
     },
     {
       "node_id": "S2",
-      "state": "Reproduce the issue in a minimal scenario by diffing pre-change vs post-change project/schema state where a non-relational field becomes a cross-module relational/reference field, and confirm missing dependencies in the generated operations.",
-      "type": "intermediate"
+      "state": "The root cause has been determined: the alteration path that introduces a relationship does not compute or attach required cross-component dependencies, unlike the addition path.",
+      "type": "intermediate",
+      "verification": [
+        "The behavioral difference between the “add operation” path and the “alter operation” path with respect to dependency generation can be explained.",
+        "The exact missing step (e.g., a skipped helper call or bypassed dependency computation) responsible for the absent dependencies has been identified."
+      ]
     },
     {
       "node_id": "S3",
-      "state": "Determine the root cause by tracing how dependency inference is applied for new-field operations but omitted or not propagated for altered-field operations when relations are introduced or changed.",
-      "type": "intermediate"
+      "state": "A minimal and deterministic reproducer has been created that demonstrates missing dependencies for an alteration introducing a relationship and reliably triggers the failure (e.g., unresolved reference or incorrect ordering).",
+      "type": "intermediate",
+      "verification": [
+        "A minimal setup/script reliably generates a change operation for an alteration that shows empty/incorrect dependency metadata.",
+        "Executing or validating the generated change set reliably reproduces the unresolved-reference/ordering failure."
+      ]
     },
     {
       "node_id": "S4",
-      "state": "Implement a patch so altered-field operations compute and attach relation-derived dependencies using the existing dependency inference utilities, ensuring consistent behavior with new-field operation generation.",
-      "type": "intermediate"
+      "state": "The generator has been updated so alteration operations that introduce or change relationships now compute and carry the appropriate dependency/ordering metadata.",
+      "type": "intermediate",
+      "verification": [
+        "The alteration-operation emission path derives dependencies for relationship changes using the same (or equivalent) logic used for relationship additions.",
+        "Generated change sets for cross-component relationship alterations now include explicit dependency entries that ensure correct ordering."
+      ]
     },
     {
       "node_id": "S5",
-      "state": "Validate the fix by rerunning the minimal reproduction and executing the relevant automated test suites, confirming dependencies are present and no regressions are introduced.",
-      "type": "terminal"
+      "state": "The fix has been confirmed against the minimal reproducer: dependency metadata is present and the previously observed unresolved-reference/ordering failure no longer occurs.",
+      "type": "intermediate",
+      "verification": [
+        "Re-running the reproducer produces a change set where the alteration includes the expected cross-component dependency metadata.",
+        "The reproducer no longer triggers the prior unresolved-reference/ordering error."
+      ]
     },
     {
-      "node_id": "E1",
-      "state": "Tooling/command formatting prevents progress because multiple actions were bundled into a single execution request, blocking repository inspection.",
-      "type": "erroneous"
+      "node_id": "S6",
+      "state": "The fix has been validated against the project’s automated test suites covering change generation, ordering, and dependency behavior, with no regressions detected.",
+      "type": "intermediate",
+      "verification": [
+        "Relevant automated tests for change generation/migrations (or equivalent subsystem) pass with the fix applied.",
+        "No new test failures appear related to ordering, dependency resolution, or relationship handling."
+      ]
     },
     {
-      "node_id": "E2",
-      "state": "Task was prematurely marked complete without implementing a fix, performing investigation, or running validation tests.",
-      "type": "erroneous"
+      "node_id": "S8",
+      "state": "The final change set has been cleaned and is ready for submission, with only intended source/test modifications and no temporary artifacts.",
+      "type": "terminal",
+      "verification": [
+        "The diff contains only intended source and test changes; temporary repro scripts/files and unrelated modifications have been removed.",
+        "The implementation is review-ready: consistent style, minimal surface area, and a coherent test story."
+      ]
     },
     {
       "node_id": "__START__",
       "state": "Start",
-      "type": "start"
+      "type": "start",
+      "verification": []
     }
   ],
   "edges": [
     {
       "edge_id": 1,
-      "from_node": "E1",
-      "to_node": "E2",
-      "type": "erroneous",
-      "thought": "Submitting completion after an execution/formatting failure prevents any real investigation or fix from occurring and guarantees the reported issue remains unresolved.",
-      "actions": "Do not finalize the task while blocked; first correct the execution approach and proceed with investigation, reproduction, implementation, and validation before attempting to complete.",
-      "errors": [
-        "Task was marked complete immediately after an execution/formatting failure despite no investigation, code changes, or tests being run.",
-        "Attempted to submit despite having made no code changes, performed no investigation, and run no tests."
-      ]
-    },
-    {
-      "edge_id": 2,
       "from_node": "S1",
       "to_node": "S2",
       "type": "normal",
-      "thought": "After locating the dependency-generation logic, you need a minimal failing reproduction to precisely observe the missing dependency output and to later verify the patch fixes it.",
-      "actions": "Construct a small pre/post schema-state diff where a scalar/non-relational field becomes a cross-module relational field; run the migration autogenerator and assert the resulting operation includes a dependency on the referenced module/app.",
-      "errors": [
-        "Reproduction check failed because the generated operation set did not include the expected dependency on the referenced module/app.",
-        "Generated output showed an empty dependency list for the module/app that introduced the relationship."
-      ]
+      "thought": "Once the relevant generator locations are known, the next step is to compare how similar operations are produced to identify why one path includes dependencies while another omits them.",
+      "actions": "Compare the code paths that emit “add” versus “alter” operations, trace where dependency metadata is derived, and inspect any shared helper used for relationship dependency calculation to find discrepancies.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After identifying the suspected gap, a deterministic reproducer is needed to confirm the behavior, prevent regressions, and provide a tight feedback loop while iterating on a fix.",
+      "actions": "Build a minimal scenario that transitions an existing non-relationship attribute into a relationship/reference across components, run the change generator, and assert the produced dependency/ordering metadata and resulting failure mode.",
+      "errors": []
     },
     {
       "edge_id": 3,
-      "from_node": "S1",
-      "to_node": "S3",
+      "from_node": "S2",
+      "to_node": "S4",
       "type": "normal",
-      "thought": "Understanding the discrepancy between new-field and altered-field paths is necessary to pinpoint where dependency inference is skipped or dropped.",
-      "actions": "Trace both generation paths and compare where relation/reference dependencies are computed, how they are represented, and how they are passed into operation construction/scheduling.",
+      "thought": "With the root cause understood, implementing the fix can proceed by ensuring the alteration path invokes the same dependency derivation logic used elsewhere for relationships.",
+      "actions": "Modify the alteration-operation emission logic to compute relationship dependencies when the new definition introduces a reference, and attach that dependency metadata to the produced operation.",
       "errors": []
     },
     {
       "edge_id": 4,
-      "from_node": "S2",
+      "from_node": "S3",
       "to_node": "S4",
       "type": "normal",
-      "thought": "Once the missing dependency is confirmed, implement the fix by ensuring altered-field operations compute relation-derived dependencies and propagate them into the operation graph, matching the behavior of new-field operations.",
-      "actions": "Update the altered-field operation builder to detect relational/reference fields and invoke the same dependency inference used elsewhere; pass the resulting dependencies into the operation registration/scheduling mechanism.",
+      "thought": "If the reproducer exists, it can guide implementation details and quickly verify that the change generator now emits correctly ordered, dependency-complete operations for relationship-altering changes.",
+      "actions": "Implement the dependency computation in the alteration path and iteratively run the minimal reproducer to confirm the generated change set includes the expected cross-component dependencies.",
       "errors": []
     },
     {
       "edge_id": 5,
-      "from_node": "S2",
+      "from_node": "S4",
       "to_node": "S5",
       "type": "normal",
-      "thought": "If the minimal reproduction now passes (or is expected to pass), run the broader test suite to ensure correctness across related scenarios and prevent regressions.",
-      "actions": "Execute the relevant unit/integration tests for migration autogeneration and dependency resolution; include cross-module relations and other representative cases covered by existing tests.",
+      "thought": "After code changes are made, the quickest validation is to rerun the exact scenario that previously failed and check that dependencies and execution now succeed.",
+      "actions": "Re-run the minimal reproducer, inspect the generated change set for the expected dependency metadata, and confirm the previously observed unresolved-reference/ordering error is eliminated.",
       "errors": []
     },
     {
       "edge_id": 6,
-      "from_node": "S3",
-      "to_node": "S4",
+      "from_node": "S4",
+      "to_node": "S6",
       "type": "normal",
-      "thought": "After identifying the precise omission in the altered-field code path, apply a targeted change that adds the missing dependency computation and propagation for relational alterations.",
-      "actions": "Implement a minimal, consistent change to the altered-field generation logic to compute dependencies for the new field definition when it introduces/changes a relation and ensure those dependencies are attached to the resulting operation.",
-      "errors": []
+      "thought": "Local validation is insufficient without ensuring the broader test suite still passes; also, correct invocation of the project’s test runner is necessary to get reliable results.",
+      "actions": "Run the relevant automated tests using the repository’s supported test execution entrypoint, focusing on suites that cover change generation and dependency/ordering behavior.",
+      "errors": [
+        "Tests were initially executed using an incorrect or unsupported test-runner invocation, causing module/import resolution failures; rerunning with the repository’s proper test runner resolved the issue."
+      ]
     },
     {
       "edge_id": 7,
-      "from_node": "S4",
-      "to_node": "S2",
+      "from_node": "S5",
+      "to_node": "S6",
       "type": "normal",
-      "thought": "Re-running the minimal reproduction after the patch provides fast feedback that dependency inference now works for altered fields before spending time on broader test runs.",
-      "actions": "Re-execute the minimal state-diff reproduction and inspect the generated operations/dependency list to confirm the referenced module/app is now included as an explicit dependency.",
-      "errors": []
+      "thought": "Even if the minimal reproduction passes, the fix must be checked against the full test surface and nearby scenarios to ensure no regressions or unintended dependency changes.",
+      "actions": "Execute the change-generation focused tests with the correct runner and optionally sanity-check adjacent scenarios (e.g., same-component relationships or changing relationship targets) to confirm behavior is consistent.",
+      "errors": [
+        "An initial test run failed due to using the wrong test-runner entrypoint or module path; switching to the correct repository test runner fixed the failure."
+      ]
     },
     {
       "edge_id": 8,
-      "from_node": "S4",
-      "to_node": "S5",
+      "from_node": "S5",
+      "to_node": "S8",
       "type": "normal",
-      "thought": "After confirming the patch behavior locally, run the project’s official test runner and targeted suites to ensure the fix integrates correctly with the broader testing harness and doesn’t break unrelated behavior.",
-      "actions": "Use the repository’s standard test execution entrypoint to run the relevant migration/autogeneration tests; if an initial test invocation fails due to incorrect runner/module usage, switch to the supported test runner and rerun.",
-      "errors": [
-        "Attempted to run tests using an unsupported invocation which raised a ModuleNotFoundError; resolved by switching to the repository’s canonical test runner.",
-        "Initial test command failed with ModuleNotFoundError due to incorrect test runner usage; corrected by using the project-provided test execution script."
-      ]
+      "thought": "If the reproducer validation is strong and the change is isolated, the work can move directly to final hardening and cleanup by running a broader set of checks and edge cases.",
+      "actions": "Run broader automated coverage and a small set of targeted edge-case scenarios around relationship introduction/retargeting to increase confidence before finalizing the patch.",
+      "errors": []
     },
     {
       "edge_id": 9,
-      "from_node": "__START__",
-      "to_node": "E1",
-      "type": "erroneous",
-      "thought": "Before inspecting code, commands must conform to the execution environment’s constraints; otherwise, investigation is blocked at the first step.",
-      "actions": "Issue a single, well-scoped execution request at a time (one command/action per execution block) to locate the relevant dependency/autogeneration logic without violating tool formatting rules.",
-      "errors": [
-        "Execution was blocked because multiple actions were provided in a single request and the environment requires exactly one action per triple-backticked command.",
-        "Environment rejected the request due to an improperly formatted multi-action command (expected exactly one action)."
-      ]
+      "from_node": "S6",
+      "to_node": "S8",
+      "type": "normal",
+      "thought": "After tests pass, the last step is ensuring the patch is reviewable and contains no temporary artifacts or exploratory code.",
+      "actions": "Remove temporary reproduction artifacts, re-check the diff for scope and cleanliness, and optionally rerun a focused test subset to confirm the repository remains in a consistent state.",
+      "errors": []
     },
     {
       "edge_id": 10,
       "from_node": "__START__",
       "to_node": "S1",
       "type": "normal",
-      "thought": "The first step is to correctly locate the autogeneration/dependency code in the actual repository layout; incorrect paths waste time and can look like missing files.",
-      "actions": "Confirm the repository root and search within the correct source tree for the migration autogeneration and dependency computation modules; then focus on the new-field vs altered-field operation generation paths.",
+      "thought": "To fix missing dependency metadata, the first requirement is knowing exactly where the generator produces operations and where dependency attachment should occur.",
+      "actions": "Locate the change-generation subsystem in the repository, identify functions responsible for emitting add/alter operations, and trace where dependency/ordering metadata is computed and associated with emitted operations.",
       "errors": [
-        "Searched for source files under an incorrect repository path, requiring discovery of the correct working directory before proceeding.",
-        "Initial commands targeted a non-existent path in the environment; corrected by locating the actual checkout directory and re-running the search."
+        "A combined or improperly structured command/request was rejected by the execution environment; breaking it into single, well-formed steps resolved the issue.",
+        "An incorrect assumed repository location or file path caused navigation/search failures; correcting the working directory or locating files via search fixed it.",
+        "A tooling constraint rejected the initial attempt to inspect code due to formatting/multiple-actions; retrying with a compatible invocation succeeded."
       ]
     }
   ]

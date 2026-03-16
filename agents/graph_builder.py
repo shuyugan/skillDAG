@@ -14,7 +14,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any
 
-from .state_canonicalizer import CanonicalState, StateCanonicalizerResult
+from .state_canonicalizer import StateCanonicalizerResult
 from .trajectory_analyzer import TrajectoryAnalysis
 
 logger = logging.getLogger(__name__)
@@ -26,14 +26,13 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class RawNode:
-    node_id: str          # same as canonical state_id (S1, E1, ...)
+    node_id: str          # same as canonical state_id (S1, S2, ...)
     raw_state: str        # description from canonicalization
-    type: str             # start | intermediate | terminal | erroneous
+    type: str             # start | intermediate | terminal
     raw_verification: list[str] = field(default_factory=list)
     # Examples collected from contributing milestones
     action_examples: list[str] = field(default_factory=list)
     intent_examples: list[str] = field(default_factory=list)
-    observation_examples: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -41,7 +40,7 @@ class RawEdge:
     edge_id: int
     from_node: str        # node_id (state_id)
     to_node: str
-    type: str             # normal | erroneous | rollback
+    type: str             # normal
     # Examples collected from contributing transitions
     action_examples: list[str] = field(default_factory=list)
     intent_examples: list[str] = field(default_factory=list)
@@ -142,8 +141,9 @@ class GraphBuilder:
         # --- Build nodes (type comes directly from Stage 2) ---
         nodes: dict[str, RawNode] = {}
         for s in canon.canonical_states:
-            ntype = {"normal": "intermediate", "terminal": "terminal",
-                     "erroneous": "erroneous"}.get(s.type, "intermediate")
+            ntype = {"normal": "intermediate", "terminal": "terminal"}.get(
+                s.type, "intermediate"
+            )
             nodes[s.state_id] = RawNode(
                 node_id=s.state_id,
                 raw_state=s.description,
@@ -163,8 +163,6 @@ class GraphBuilder:
                 node.action_examples.append(ms.action)
             if ms.intent:
                 node.intent_examples.append(ms.intent)
-            for obs in (ms.key_observations or []):
-                node.observation_examples.append(obs)
 
         # --- Add virtual START node ---
         nodes["__START__"] = RawNode(
@@ -191,23 +189,33 @@ class GraphBuilder:
                 "to_milestone_id": a.milestones[0].milestone_id,
             })
 
-            # Subsequent transitions between consecutive states
+            # Subsequent transitions between consecutive states.
+            # When a self-loop is encountered (error milestone mapped to same
+            # state), we skip the edge but collect error_info and attach it to
+            # the next outgoing transition from that state.
+            pending_errors: list[str] = []
             for j in range(len(trace) - 1):
                 from_sid = trace[j]
                 to_sid = trace[j + 1]
+                loop_ms = milestone_lookup.get((i, a.milestones[j + 1].milestone_id))
+
                 if from_sid == to_sid:
-                    continue  # self-loop: skip
+                    # Self-loop: collect error_info for the next real transition
+                    if loop_ms and loop_ms.error_info and loop_ms.error_info.symptom:
+                        pending_errors.append(loop_ms.error_info.symptom)
+                    continue
 
                 from_mid = a.milestones[j].milestone_id
-                to_mid = a.milestones[j + 1].milestone_id if j + 1 < len(a.milestones) else None
-                to_ms = milestone_lookup.get((i, to_mid)) if to_mid else None
+                to_mid = a.milestones[j + 1].milestone_id
 
                 transition_data[(from_sid, to_sid)].append({
                     "traj_index": i,
-                    "milestone": to_ms,
+                    "milestone": loop_ms,
                     "from_milestone_id": from_mid,
                     "to_milestone_id": to_mid,
+                    "pending_errors": list(pending_errors),
                 })
+                pending_errors.clear()
 
         # --- Build edges + transition mappings ---
         edges: list[RawEdge] = []
@@ -218,8 +226,6 @@ class GraphBuilder:
             to_node = nodes.get(to_sid)
             if not from_node or not to_node:
                 continue
-
-            etype = self._edge_type(from_node.type, to_node.type)
 
             action_examples: list[str] = []
             intent_examples: list[str] = []
@@ -241,12 +247,14 @@ class GraphBuilder:
                     intent_examples.append(ms.intent)
                 if ms.error_info and ms.error_info.symptom:
                     error_examples.append(ms.error_info.symptom)
+                # Include errors carried over from skipped self-loops
+                error_examples.extend(ex.get("pending_errors", []))
 
             edges.append(RawEdge(
                 edge_id=edge_id,
                 from_node=from_sid,
                 to_node=to_sid,
-                type=etype,
+                type="normal",
                 action_examples=action_examples,
                 intent_examples=intent_examples,
                 error_examples=error_examples[:5],
@@ -255,14 +263,10 @@ class GraphBuilder:
                 edge_id=edge_id,
                 from_node=from_sid,
                 to_node=to_sid,
-                type=etype,
+                type="normal",
                 contributors=contributors,
             ))
             edge_id += 1
-
-        # --- Trim node examples ---
-        for n in nodes.values():
-            n.observation_examples = n.observation_examples[:5]
 
         # --- Connectivity check ---
         node_list = list(nodes.values())
@@ -285,27 +289,19 @@ class GraphBuilder:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _edge_type(from_type: str, to_type: str) -> str:
-        if to_type == "erroneous":
-            return "erroneous"
-        if from_type == "erroneous":
-            return "rollback"
-        return "normal"  # includes start -> normal/initial/terminal
-
-    @staticmethod
     def _check_connectivity(nodes: list[RawNode], edges: list[RawEdge]) -> None:
         """Log warnings for unreachable or dead-end nodes."""
         all_ids = {n.node_id for n in nodes}
         has_incoming = {e.to_node for e in edges}
         has_outgoing = {e.from_node for e in edges}
 
-        initial_ids = {n.node_id for n in nodes if n.type == "start"}
+        start_ids = {n.node_id for n in nodes if n.type == "start"}
         terminal_ids = {n.node_id for n in nodes if n.type == "terminal"}
 
-        no_incoming = all_ids - has_incoming - initial_ids
-        no_outgoing = all_ids - has_outgoing - terminal_ids - {n.node_id for n in nodes if n.type == "erroneous"}
+        no_incoming = all_ids - has_incoming - start_ids
+        no_outgoing = all_ids - has_outgoing - terminal_ids
 
         if no_incoming:
-            logger.warning("nodes with no incoming edges (not initial): %s", sorted(no_incoming))
+            logger.warning("nodes with no incoming edges (not start): %s", sorted(no_incoming))
         if no_outgoing:
-            logger.warning("nodes with no outgoing edges (not terminal/erroneous): %s", sorted(no_outgoing))
+            logger.warning("nodes with no outgoing edges (not terminal): %s", sorted(no_outgoing))

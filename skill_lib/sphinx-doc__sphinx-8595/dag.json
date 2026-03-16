@@ -1,0 +1,250 @@
+{
+  "instance_id": "sphinx-doc__sphinx-8595",
+  "skill_name": "Respect Explicit Empty Export Lists",
+  "description": "Applies when a documentation/introspection or enumeration feature filters items based on an optional user-defined export list (allowlist), but an explicitly empty list is mistakenly treated as “not provided.” Use this workflow to locate the selection logic, fix truthiness/None conflation, and validate behavior across absent/empty/non-empty configurations.",
+  "trigger_conditions": [
+    "A feature supports an optional allowlist/denylist configuration (e.g., an export list) that changes what items are shown or processed",
+    "Setting the list to empty is expected to suppress everything, but the system behaves as if the list were not set",
+    "The code likely uses a generic truthiness check that can’t distinguish “unset” from “set to empty”",
+    "A bug report includes a minimal reproduction where an explicit empty configuration is ignored"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "Repository workspace has been located and is usable for editing, running checks, and executing the project’s tests.",
+      "type": "intermediate",
+      "verification": [
+        "Project root can be reached and core source and test directories can be identified.",
+        "A basic project command (e.g., running a minimal test collection or importing the package) works without path or environment errors."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The component and code path that selects/filters module (or collection) members has been located, including where the optional export/allowlist influences the decision.",
+      "type": "intermediate",
+      "verification": [
+        "The responsible module/function(s) where members are collected and filtered can be identified.",
+        "The exact decision point where an allowlist/export list changes inclusion/exclusion can be described."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The root cause has been identified as a logic conflation where an explicitly empty export/allowlist is treated as equivalent to a missing/unset value.",
+      "type": "intermediate",
+      "verification": [
+        "The incorrect conditional (e.g., a truthiness check) and how it misclassifies empty-but-defined values can be explained.",
+        "The intended semantics are clear: “unset/undefined” differs from “defined but empty,” and the system should behave differently for each."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "A code change has been made so the system respects an explicitly empty export/allowlist while preserving the prior behavior when the list is absent/unset.",
+      "type": "intermediate",
+      "verification": [
+        "The selection logic now distinguishes “unset” from “empty,” typically via an explicit sentinel/None/defined check rather than a generic falsy check.",
+        "Behavior for the absent/unset configuration remains consistent with previous expectations."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "A minimal end-to-end reproduction setup has been created that can run the system against a small example to observe the produced output.",
+      "type": "intermediate",
+      "verification": [
+        "A minimal project/config plus example input can be executed end-to-end to generate output without build/runtime failure.",
+        "The example subject (module/package/input) is resolvable by the run (e.g., on the import path or otherwise discoverable)."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "Behavior has been manually validated for key scenarios: empty allowlist/export list, missing/unset allowlist, and non-empty allowlist, confirming correct inclusion/exclusion in each case.",
+      "type": "intermediate",
+      "verification": [
+        "When the allowlist/export list is explicitly empty, the output shows no members/items under the affected operation.",
+        "When the allowlist/export list is missing/unset, default behavior is observed; when non-empty, only the specified subset is included."
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "Automated regression checks have been run and any failures have been triaged to determine whether they are pre-existing or attributable to the change.",
+      "type": "intermediate",
+      "verification": [
+        "Relevant automated tests can be executed and the results reviewed for regressions related to the selection/filtering behavior.",
+        "If failures occur, evidence has been gathered to classify them as pre-existing vs introduced by the patch (e.g., comparing with and without local changes)."
+      ]
+    },
+    {
+      "node_id": "S8",
+      "state": "The change has been finalized and is ready for submission with evidence that it fixes the issue and does not introduce attributable regressions.",
+      "type": "terminal",
+      "verification": [
+        "The final patch cleanly implements the intended semantics and follows the project’s conventions.",
+        "There is validation evidence (manual and/or automated) showing the reported issue is fixed and any remaining failures are not caused by the patch."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "To fix an ignored empty allowlist/export list, the filtering decision logic must be found first so the exact interpretation point can be corrected.",
+      "actions": "Locate the member/item collection pipeline, search for references to the export/allowlist configuration, and identify where inclusion decisions are made and where the configuration is read or normalized.",
+      "errors": [
+        "Repository location or layout was assumed incorrectly, requiring a search to find the actual working checkout before code could be inspected."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "If the faulty logic is already visible while establishing the workspace, a direct targeted edit can be made without fully mapping the entire selection pipeline first.",
+      "actions": "Open the suspected selection/filtering code path and adjust the conditional so it distinguishes an unset value from an explicitly empty sequence; confirm the change by reviewing the diff.",
+      "errors": [
+        "Attempted to change into a non-existent project directory because the repository was located elsewhere in the environment."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S1",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Running the test suite early helps detect whether the environment already has known failures and provides a baseline to judge whether later failures are introduced by the fix.",
+      "actions": "Execute relevant automated tests, inspect failures, and if needed temporarily revert/stash local changes to confirm whether the failure reproduces on the baseline; continue testing while accounting for known unrelated failures.",
+      "errors": [
+        "Automated tests reported an unrelated failing test due to a warning/assertion, leaving the overall run not fully clean and with no new targeted regression test added for the specific behavior."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Once the filtering decision point is known, implement the minimal semantic fix: treat 'unset' differently from 'set but empty' so an explicit empty list is honored.",
+      "actions": "Replace truthiness-based branching with an explicit defined/unset check (e.g., sentinel/None) and ensure the downstream filtering logic receives the correct representation of 'empty but defined.'",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "After confirming the root cause is truthiness/None conflation, the correction is straightforward: preserve the explicit emptiness instead of falling back to default behavior.",
+      "actions": "Update the conditional logic to branch based on presence/definedness rather than truthiness, and verify the change via code review/diff inspection.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "An end-to-end reproduction ensures the fix works in a real execution path, not just in isolated logic inspection, and helps confirm output formatting/visibility matches expectations.",
+      "actions": "Create a minimal runnable setup that exercises the feature, ensure the example input can be discovered/loaded by the runtime, and run the build/execution to observe the output after the change.",
+      "errors": [
+        "End-to-end run initially failed due to using the wrong working directory and the example subject not being discoverable/importable; both issues were corrected."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After implementing the fix, validate it across typical configurations to ensure correct semantics and prevent regressions in related cases.",
+      "actions": "Run the minimal reproduction for at least three scenarios (empty, missing/unset, and non-empty allowlist) and compare outputs against expected inclusion/exclusion rules.",
+      "errors": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S4",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Automated tests provide broader regression coverage; the test invocation itself must match what the environment supports to avoid false failures unrelated to the code change.",
+      "actions": "Run targeted automated tests for the affected component; if invocation errors occur, adjust to supported options and re-run; then inspect failures to determine whether they relate to the patch.",
+      "errors": [
+        "Tests were invoked with an unsupported runner option, requiring re-running with compatible arguments."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Once an end-to-end reproduction environment exists, it can be reused to check multiple configurations quickly and confirm the expected behavior matrix.",
+      "actions": "Iterate the minimal example through empty/unset/non-empty allowlist configurations and confirm output changes align with the specification for each case.",
+      "errors": []
+    },
+    {
+      "edge_id": 10,
+      "from_node": "S6",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "After manual verification, returning to the repository context ensures changes can be validated with project tooling and test infrastructure from the correct location.",
+      "actions": "Navigate back to the correct project root and prepare to run the automated checks from the intended environment.",
+      "errors": [
+        "Test execution initially failed because it was started from an incorrect/non-existent repository path."
+      ]
+    },
+    {
+      "edge_id": 11,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "When tests fail, distinguishing pre-existing failures from patch-caused regressions is necessary to assess risk and confidently finalize the change.",
+      "actions": "Investigate failing tests, compare behavior with local changes temporarily removed, and proceed with remaining tests while documenting/isolating any known baseline failures.",
+      "errors": [
+        "A warning-triggered assertion was already failing on the baseline and was unrelated to the code change.",
+        "The test suite contained a pre-existing failure caused by an extension/setup warning about duplicate registration of a node/component."
+      ]
+    },
+    {
+      "edge_id": 12,
+      "from_node": "S7",
+      "to_node": "S8",
+      "type": "normal",
+      "thought": "With the fix implemented and validation complete, the work can be packaged for submission along with evidence and notes about any unrelated test instability.",
+      "actions": "Review the final diff for scope and style, summarize validation performed (manual scenarios and test results), and prepare the patch for submission.",
+      "errors": []
+    },
+    {
+      "edge_id": 13,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before code investigation can proceed, commands and file operations must be executed within the tool’s constraints and from the actual repository location.",
+      "actions": "Issue single, well-scoped environment commands to locate the repository root, confirm file presence, and then proceed with code search and inspection within the correct workspace.",
+      "errors": [
+        "Command execution was rejected because multiple actions were bundled together instead of being issued separately.",
+        "File access failed because a file path was assumed incorrectly and did not exist in the current environment."
+      ]
+    },
+    {
+      "edge_id": 14,
+      "from_node": "__START__",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Directly identifying the selection/filtering logic accelerates diagnosis by anchoring investigation on the precise decision point where configuration affects output.",
+      "actions": "Search the codebase for the configuration key and member selection routines, then inspect the surrounding logic to find where the configuration is interpreted.",
+      "errors": [
+        "The initial command attempt was rejected because it combined multiple actions rather than a single executable step."
+      ]
+    },
+    {
+      "edge_id": 15,
+      "from_node": "__START__",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "If symptoms strongly suggest an empty-vs-unset conflation, inspecting conditionals around configuration handling can quickly confirm the root cause without extensive setup.",
+      "actions": "Locate and review conditionals that branch on the configuration value, checking for truthiness-based logic that collapses empty collections and unset values into the same path.",
+      "errors": [
+        "The initial command was rejected because it attempted multiple actions instead of a single step."
+      ]
+    }
+  ]
+}

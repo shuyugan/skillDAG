@@ -1,0 +1,216 @@
+{
+  "canonical_states": [
+    {
+      "state_id": "S1",
+      "description": "Repository/workspace context is established and the relevant Sphinx source tree is accessible for modification and test execution.",
+      "type": "normal",
+      "verification": [
+        "Can navigate to the correct sphinx checkout root and identify key directories (e.g., sphinx/, tests/).",
+        "Can run a basic command from the repo root (e.g., import sphinx in python or invoke pytest collection) without path errors."
+      ]
+    },
+    {
+      "state_id": "S2",
+      "description": "Autodoc’s module member selection path and the specific __all__ handling code location are identified.",
+      "type": "normal",
+      "verification": [
+        "Can point to the file/function(s) where autodoc decides the exported/documented members for a module.",
+        "Can describe the decision point where __all__ presence/absence influences filtering."
+      ]
+    },
+    {
+      "state_id": "S3",
+      "description": "Root cause is diagnosed: empty __all__ is being treated the same as missing __all__ due to a falsy check or equivalent conflation.",
+      "type": "normal",
+      "verification": [
+        "Can explain the incorrect conditional logic (e.g., truthiness check) and why it ignores an explicitly empty list.",
+        "Can state the intended semantic distinction between __all__ is None/undefined vs __all__ is an empty list."
+      ]
+    },
+    {
+      "state_id": "S4",
+      "description": "Code change is implemented to respect an explicitly empty __all__ (distinguishing None/undefined from empty sequences) while preserving existing behavior when __all__ is absent.",
+      "type": "normal",
+      "verification": [
+        "A diff exists that changes the __all__ decision logic to an explicit None/defined check (or equivalent) rather than a generic falsy check.",
+        "The change can be shown to keep prior behavior for modules without __all__."
+      ]
+    },
+    {
+      "state_id": "S5",
+      "description": "An end-to-end reproduction environment is created and can successfully build Sphinx docs against a minimal example module to observe autodoc output.",
+      "type": "normal",
+      "verification": [
+        "A minimal Sphinx project (conf.py/index.rst plus example module) can be built successfully with sphinx-build.",
+        "The example module is importable by the build (e.g., sys.path adjusted or module placed appropriately)."
+      ]
+    },
+    {
+      "state_id": "S6",
+      "description": "Fix is behavior-validated across key scenarios (empty __all__, missing __all__, and selective/non-empty __all__) with expected member inclusion/exclusion.",
+      "type": "normal",
+      "verification": [
+        "Observed docs output shows no members when __all__ is an empty list.",
+        "Observed docs output shows default behavior when __all__ is missing and filtered behavior when __all__ is non-empty."
+      ]
+    },
+    {
+      "state_id": "S7",
+      "description": "Regression assessment is performed via automated tests, and any failures are triaged to determine whether they are pre-existing or caused by the change.",
+      "type": "normal",
+      "verification": [
+        "Relevant pytest targets for autodoc can be executed and results reviewed.",
+        "If failures occur, there is evidence (e.g., stash/revert comparison) establishing whether the failure reproduces without the change."
+      ]
+    },
+    {
+      "state_id": "S8",
+      "description": "Change is ready for submission: patch is finalized with confidence that it fixes the bug and does not introduce attributable regressions.",
+      "type": "terminal",
+      "verification": [
+        "Final diff cleanly implements the intended behavior and is consistent with project conventions.",
+        "Manual and/or automated validation evidence exists showing the reported issue is fixed and no new failures are attributable to the patch."
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "traj_index": 0,
+      "milestone_id": 1,
+      "state_id": "S3",
+      "reason": "The milestone identifies the relevant __all__ handling logic and states the root cause (empty __all__ ignored due to conditional behavior), which matches diagnosing conflation of empty vs missing __all__."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 2,
+      "state_id": "S4",
+      "reason": "Implements the fix by changing the __all__ condition to an explicit None check and verifies via diff, matching the required code change to respect an explicitly empty __all__."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 3,
+      "state_id": "S5",
+      "reason": "Creates a minimal external Sphinx project and successfully builds after fixing path/import issues, satisfying the end-to-end reproduction environment criteria."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 4,
+      "state_id": "S6",
+      "reason": "Manually validates behavior across empty __all__, missing __all__, and non-empty __all__, matching the key scenario validation requirements."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 5,
+      "state_id": "S7",
+      "reason": "Runs pytest, investigates a failing test, and confirms it is pre-existing by stashing/re-running, which is exactly the regression assessment and triage state."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "Submission attempt failed due to missing a dedicated regression test; capability did not advance to 'ready for submission', so it remains at the regression-assessment stage reached previously."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 1,
+      "state_id": "S2",
+      "reason": "Milestone centers on locating and understanding the autodoc control flow where module members are selected and where __all__ influences filtering, satisfying identification of the relevant code path."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 2,
+      "state_id": "S4",
+      "reason": "Implements the concrete code change to distinguish missing __all__ from an explicitly empty __all__ via an explicit None check, matching the required fix implementation criteria."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 3,
+      "state_id": "S6",
+      "reason": "Builds a minimal Sphinx project and validates behavior across empty, missing, and selective __all__ scenarios, which is the behavior-validation matrix described in S6."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 4,
+      "state_id": "S1",
+      "reason": "Corrects the repo path and establishes the ability to run tests from the proper Sphinx checkout root, aligning with workspace/repo context being correctly established."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 5,
+      "state_id": "S7",
+      "reason": "Attempts automated regression testing, investigates a failing test, and determines it is pre-existing via stashing; although the milestone ends in error, it reflects the regression-assessment/triage capability of S7 and the agent remains at that stage."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "This milestone reflects an initial failed attempt to locate files due to wrong repo path/command issues; the workspace context was not yet correctly established, so it best matches the earliest state about establishing repo accessibility."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "The correct source tree was found and the specific autodoc __all__-related member filtering logic was located and inspected, satisfying identification of the decision point and code location."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "A concrete fix was implemented changing the logic from a falsy conflation to an explicit None check while diagnosing the cause; the key achieved capability here is the implemented code change respecting empty __all__."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 4,
+      "state_id": "S6",
+      "reason": "An end-to-end minimal Sphinx project build was used to validate behavior across empty, non-empty, and missing __all__ scenarios, which directly matches the multi-scenario behavior validation criteria."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 5,
+      "state_id": "S7",
+      "reason": "Automated tests were run, a failure was triaged and shown to be pre-existing via stashing/reverting, and remaining tests were executed—meeting regression assessment and attribution requirements."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 6,
+      "state_id": "S8",
+      "reason": "The milestone indicates completion/ready-for-submission status after implementation and validation, aligning with the terminal state of having a finalized patch with confidence in correctness and no attributable regressions."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "The attempt to start investigating was blocked before identifying any specific autodoc code locations; this corresponds to being at the initial stage of establishing workable repo/command context."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 2,
+      "state_id": "S1",
+      "reason": "Successfully located the correct Sphinx repository under /testbed and gained access to the source tree, satisfying the workspace/context-established criteria."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "A concrete code change was implemented to ensure an explicitly empty __all__ is handled differently from missing __all__, which matches the implementation milestone for the fix."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 4,
+      "state_id": "S7",
+      "reason": "Relevant autodoc tests were executed (after fixing invocation) and a failure was investigated/triaged via its output, matching the regression assessment/testing state."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 5,
+      "state_id": "S7",
+      "reason": "Performed stash/revert comparison to show the failure was pre-existing and reran tests excluding the known failing case, which is exactly the triage/regression-assessment verification criterion."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "The final step was an error due to premature submission; capability did not advance to a terminal 'ready for submission' state, so it remains at the testing/triage stage reached previously."
+    }
+  ]
+}

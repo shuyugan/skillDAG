@@ -1,0 +1,200 @@
+{
+  "instance_id": "sympy__sympy-13798",
+  "skill_name": "Relax Enumerated Option to Custom Value",
+  "description": "Applies when a library/API option is artificially limited to a fixed set of enumerated values but users need to supply arbitrary custom values. This workflow updates validation/mapping logic to preserve existing presets while allowing pass-through of user-provided strings, and then validates behavior and documentation.",
+  "trigger_conditions": [
+    "A configuration/keyword argument rejects values outside a small predefined list, but custom values are reasonable and safe",
+    "The option is implemented as a hard-coded mapping/lookup that raises on unknown keys (or coerces unexpectedly)",
+    "A backwards-compatible enhancement is requested: keep existing named presets while allowing arbitrary user input",
+    "The option influences formatting/serialization/output, making it easy to verify via example outputs"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "Relevant code path that parses and applies the constrained option has been located and scoped for modification.",
+      "type": "intermediate",
+      "verification": [
+        "The specific module/class/function responsible for processing the user-facing option is identified.",
+        "The exact code block where the option is interpreted, validated, or translated into internal/output form is pinpointed."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "Root cause of the restriction has been understood as a hard-coded preset mapping/enumeration that rejects unknown values.",
+      "type": "intermediate",
+      "verification": [
+        "The failure mode for custom values is explained (e.g., exception on unmapped key or forced coercion).",
+        "The mechanism translating preset keywords into concrete output/internal values is described."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "A backward-compatible behavior contract has been defined: existing preset keywords are preserved, and unknown inputs fall back to a safe pass-through representation.",
+      "type": "intermediate",
+      "verification": [
+        "The intended behavior for known presets versus unknown/custom inputs is clearly stated.",
+        "Compatibility constraints are explicit (no behavior change for previously supported values; only broaden acceptance)."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "Core implementation has been updated so custom option values are accepted by falling back to the user-provided value when no preset mapping exists.",
+      "type": "intermediate",
+      "verification": [
+        "The code contains conditional/exception-safe logic that prevents errors for unmapped values and uses the provided value directly.",
+        "Previously supported preset options still resolve through the original mapping and behave unchanged."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Runtime behavior has been validated with targeted examples covering both preset behavior and custom value behavior.",
+      "type": "intermediate",
+      "verification": [
+        "Supplying a custom value produces output that includes that custom value in the appropriate place/format.",
+        "At least one preset option is confirmed to produce identical/expected output after the change."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "User-facing documentation has been updated to state that the option accepts arbitrary custom strings/values in addition to preset keywords.",
+      "type": "intermediate",
+      "verification": [
+        "Documentation explicitly mentions custom values are allowed, not only predefined choices.",
+        "Documentation makes clear that preset keywords remain supported and unchanged."
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "Edits have been regression-checked and code integrity has been confirmed (imports/run paths succeed and behavior remains correct).",
+      "type": "intermediate",
+      "verification": [
+        "The modified module loads without syntax/indentation/import errors and the relevant feature runs.",
+        "Available automated tests or equivalent focused checks have been executed to confirm no regressions around the option behavior."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the processing location is found, inspecting the option-handling logic is necessary to determine exactly how and why non-preset values are rejected and what must change to enable custom values safely.",
+      "actions": "Read the option parsing/initialization flow, identify where preset keywords are mapped to concrete representations, and determine what happens when an unknown value is supplied (lookup, validation, or assertion).",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After identifying the hard-coded restriction, a minimal, backward-compatible design must be chosen; attempts to apply broad automated edits can fail if they rely on fragile exact-text matches.",
+      "actions": "Define a simple contract (map known presets; otherwise pass through), then choose a robust editing approach (structural/line-based edits rather than brittle full-block string substitutions) and re-check the file to ensure changes actually took effect.",
+      "errors": [
+        "Automated string-based replacement did not match the source due to escaping/formatting differences, so no code was changed and the original lookup remained intact.",
+        "String replacement failed because the targeted text differed slightly from expectations (e.g., whitespace or escaping), requiring a different patching strategy."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "With the root cause confirmed, the fix can be implemented directly by making the mapping tolerant to unknown values, but automated patching can still fail if it depends on exact textual matches.",
+      "actions": "Implement tolerant mapping logic (conditional check or exception-safe lookup) so unknown values fall back to the provided value; confirm the patch is truly applied by re-opening the modified region and verifying the new logic is present.",
+      "errors": [
+        "An initial automated text replacement did not apply due to mismatched escaping/formatting; the change had to be re-applied using a more reliable line-range or manual edit."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Once the compatibility-preserving design is set, the implementation must reflect that contract precisely, and edits should be applied in a way that is resilient to minor source differences.",
+      "actions": "Modify the option translation logic to first try preset resolution and otherwise accept the raw user value; use explicit conditionals or guarded lookups, then verify the updated code region and keep the preset mapping intact.",
+      "errors": [
+        "Exact-text patching failed because the source did not match the expected string/escaping, so the fix required a different, more targeted editing method."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After implementing acceptance of custom values, the fastest way to confirm correctness and backward compatibility is to exercise representative inputs and compare outputs for presets and custom values.",
+      "actions": "Run small, focused runtime examples that cover default behavior, at least one preset, and multiple custom values; include examples that exercise formatting edge cases (e.g., spacing, numeric factors, or other contexts where the option is applied).",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Once behavior is confirmed, documentation must be updated so users can discover and correctly use the expanded option; test environments may not support full-suite runs, so verification may need to be pragmatic.",
+      "actions": "Update the public docstring/docs for the option to describe both preset keywords and custom pass-through values; re-run a small set of manual checks to ensure docs match behavior, and note any limitations in running the full test suite in the current environment.",
+      "errors": [
+        "The usual test runner tooling was unavailable or failing in the environment (e.g., missing test dependencies/modules or unrelated pre-existing exceptions), preventing a clean full test-suite execution."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Even if full tests cannot run, some regression confidence is still needed; targeted execution of the most relevant checks can confirm that the change did not break existing behavior.",
+      "actions": "Attempt available automated tests; if blocked, fall back to running only the most relevant test modules/functions or creating focused sanity checks that exercise the changed code paths and ensure imports succeed.",
+      "errors": [
+        "Standard test tooling was not available (e.g., missing test framework or test runner modules), and attempts to run the full suite encountered unrelated pre-existing failures."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Documentation edits can inadvertently damage code structure in some languages/files; if a syntax/indentation failure occurs, the priority is restoring a clean, importable state and re-validating behavior.",
+      "actions": "Diagnose the syntax/indentation issue by re-checking the edited block, reconstruct the affected section into a correctly structured form, then rerun the targeted runtime checks/tests to confirm both code integrity and feature behavior.",
+      "errors": [
+        "A syntax/indentation error occurred during import due to accidental corruption of the edited block; it was resolved by rewriting the affected initialization/option-handling section."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S7",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After regression checks, documentation may still need refinement for clarity/formatting, and keeping it accurate ensures the new behavior is supported and discoverable.",
+      "actions": "Iterate on documentation wording and formatting (removing unintended whitespace/blank lines) while keeping statements aligned with the implemented behavior; re-skim the rendered/visible doc text to ensure it reads cleanly.",
+      "errors": []
+    },
+    {
+      "edge_id": 10,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before changing behavior, the responsible implementation must be found; repository/layout assumptions are often wrong, so discovery should be resilient and based on searching for the option handling.",
+      "actions": "Locate the implementation by searching for the option name and for the relevant output/serializer/printer component; confirm the correct project root and adjust the working directory as needed until the real source file is found.",
+      "errors": [
+        "An assumed repository directory/path did not exist; the correct project root had to be located before searching/editing source files."
+      ]
+    },
+    {
+      "edge_id": 11,
+      "from_node": "__START__",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Sometimes it is possible to jump straight to understanding the restriction by locating the option mapping/validation code without first performing broader scoping, as long as the correct source location is found.",
+      "actions": "Search directly for the option’s definition and mapping/validation logic in the codebase and read the surrounding documentation/comments to understand intended usage and constraints.",
+      "errors": [
+        "An initial attempt referenced a non-existent repository path; the correct source location had to be found before inspection."
+      ]
+    }
+  ]
+}

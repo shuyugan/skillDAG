@@ -421,6 +421,6 @@ if __name__ == "__main__":
     if len(sys.argv) >= 2:
         visualize_dag(sys.argv[1], sys.argv[2] if len(sys.argv) >= 3 else None, dpi=400)
     else:
-        dag_file = "/space3/shuyu/project/skillDAG/workspace_state/skill_lib/django__django-11740/dag.json"
-        out_file = "/space3/shuyu/project/skillDAG/workspace_state/skill_lib/django__django-11740/dag.png"
+        dag_file = "/space3/shuyu/project/skillDAG/workspace_state/skill_lib/sphinx-doc__sphinx-8595/dag.json"
+        out_file = "/space3/shuyu/project/skillDAG/workspace_state/skill_lib/sphinx-doc__sphinx-8595/dag.png"
         visualize_dag(dag_file, out_file, dpi=400)

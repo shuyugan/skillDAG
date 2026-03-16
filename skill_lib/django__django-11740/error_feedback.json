@@ -1,0 +1,8 @@
+{
+  "filtered_trajectory_count": 2,
+  "common_errors": [
+    "Follow tool/command formatting requirements exactly: submit a single, atomic command per step in the required code-block format, not combined or multi-action instructions.",
+    "If a step fails, pause and correct the failure before proceeding; do not move on to finalization until the previous action executes successfully.",
+    "Do not claim completion, fixes, or passing tests without performing the necessary investigation, making concrete changes, and running/verifying tests with evidence."
+  ]
+}

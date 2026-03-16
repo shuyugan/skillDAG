@@ -1,10 +1,10 @@
-# Fix missing migration dependencies on altered relations
+# Fix Missing Dependencies in Schema Diff
 
-Use this workflow when an ORM/migration system generates schema-change operations but fails to declare required ordering dependencies after a field is altered into a relationship (especially across modules/apps). It guides you from locating the dependency computation logic, reproducing the issue with a minimal state-diff test, implementing consistent dependency inference for altered fields, and validating with targeted and regression tests.
+Addresses bugs in schema-diff or migration/autogeneration systems where operations that alter existing definitions fail to include required ordering/dependency metadata (especially when introducing new references/relationships). Apply when an automatically generated change set executes in the wrong order or cannot resolve newly introduced references across modules/components.
 
 ## Trigger Conditions
 
-- A migration that alters a field into a relationship/reference does not include a dependency on the referenced module/app.
-- Runtime or migration-time failure indicates an unresolved related model/type after applying generated migrations.
-- Dependency behavior differs between “add field” and “alter field” operations for relational/reference fields.
-- A minimal reproduction shows empty or incomplete dependencies for a cross-module relationship change.
+- Auto-generated change scripts fail at runtime due to unresolved references to a newly related/linked entity after an alteration.
+- Generated change operations differ in dependency behavior between “add” vs “alter” paths for the same kind of relationship.
+- Cross-module changes work when introduced as a new field/entity but break when introduced via modification of an existing field/entity.
+- Migration/order metadata is missing or incomplete for operations that introduce relationships during an alteration.

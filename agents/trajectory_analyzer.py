@@ -35,9 +35,8 @@ class Milestone:
     action: str
     intent: str
     state_reached: str
-    outcome: str  # success | error | partial
+    outcome: str  # success | error
     error_info: ErrorInfo | None = None
-    key_observations: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -64,7 +63,6 @@ class TrajectoryAnalysis:
                 }
             else:
                 md["error_info"] = None
-            md["key_observations"] = m.key_observations
             milestones.append(md)
         return {
             "instance_id": self.instance_id,
@@ -91,7 +89,6 @@ class TrajectoryAnalysis:
                 state_reached=str(m.get("state_reached", "")),
                 outcome=str(m.get("outcome", "success")),
                 error_info=error_info,
-                key_observations=list(m.get("key_observations") or []),
             ))
         return cls(
             instance_id=str(data.get("instance_id", "")),
@@ -123,10 +120,6 @@ class TrajectoryAnalysis:
             if m.error_info:
                 lines.append(f"**Error type:** {m.error_info.error_type}")
                 lines.append(f"**Symptom:** {m.error_info.symptom}")
-            if m.key_observations:
-                lines.append("**Key observations:**")
-                for obs in m.key_observations:
-                    lines.append(f"- {obs}")
             lines.extend(["", "---", ""])
         return "\n".join(lines)
 
@@ -263,7 +256,6 @@ class TrajectoryAnalyzer:
                 state_reached=str(m.get("state_reached", "")).strip(),
                 outcome=outcome,
                 error_info=error_info,
-                key_observations=list(m.get("key_observations") or []),
             ))
 
         return TrajectoryAnalysis(
