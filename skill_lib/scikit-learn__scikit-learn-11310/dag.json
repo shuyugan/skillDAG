@@ -1,0 +1,160 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-11310",
+  "skill_name": "Add Post-Selection Refit Timing",
+  "description": "Implement and expose wall-clock timing for a final “refit on full data” step that occurs after a model selection or optimization routine completes. Apply this when users need to distinguish the time spent evaluating candidates from the time spent training the final chosen model, especially when candidate evaluation is parallelized.",
+  "trigger_conditions": [
+    "A pipeline runs candidate evaluation (e.g., cross-validation / hyperparameter search) and then optionally retrains the chosen model on all available data",
+    "Users need a first-class metric for the duration of the final refit step, independent of parallel execution used during evaluation",
+    "The code already reports per-candidate or per-fold fit/score times but lacks timing for the final selected-model training",
+    "The refit step is conditional (e.g., can be disabled, or is controlled differently under multi-metric scoring)"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The code location and control-flow conditions for the final selected-model refit on the full dataset have been identified and understood, including cases where refit is skipped or selected differently under multiple metrics.",
+      "type": "intermediate",
+      "verification": [
+        "The exact routine/block where the chosen model is retrained on the full dataset can be pointed to.",
+        "The conditions that cause the refit block to execute or be skipped are understood (e.g., refit disabled; multi-metric selection rules)."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The final selected-model refit duration has been measured and stored as a new public attribute on the fitted controller object, and is only populated when refitting actually occurs.",
+      "type": "intermediate",
+      "verification": [
+        "After a successful run with refit enabled, the fitted object exposes a new timing attribute whose value is derived from wall-clock timing around the refit operation.",
+        "When refit is disabled, the timing attribute is not created or is not available on the fitted object."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The timing attribute’s conditional presence and basic value semantics have been validated across key configuration variants, including disabled refit and multiple-metric selection modes.",
+      "type": "intermediate",
+      "verification": [
+        "When refit runs, the timing attribute is a numeric scalar and is non-negative.",
+        "When refit is disabled (including under multi-metric configurations), the timing attribute is absent/unavailable."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "Relevant automated tests for selection-and-refit behavior have been executed successfully, and any failures have been confirmed as unrelated infrastructure/environment issues rather than regressions from the change.",
+      "type": "intermediate",
+      "verification": [
+        "Targeted tests covering selection plus refit behavior pass with the change applied.",
+        "Any observed failures are traced to unrelated test-environment/tooling incompatibilities and are isolated from the changed behavior."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Public API documentation has been updated to describe the new timing attribute and clearly state when it is available.",
+      "type": "intermediate",
+      "verification": [
+        "The public-facing documentation for the relevant selection/refit controllers mentions the new timing attribute with correct semantics and availability conditions.",
+        "The documentation formatting is correct and renders cleanly (no malformed sections due to spacing/structure mistakes)."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "The timing feature is fully integrated: the attribute is implemented, documented, and validated end-to-end across supported refit modes without introducing regressions.",
+      "type": "terminal",
+      "verification": [
+        "An end-to-end run with refit enabled produces expected outputs plus a correctly populated timing attribute for the final refit step.",
+        "An end-to-end run with refit disabled preserves prior behavior and does not expose the timing attribute."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the refit execution point and its guard conditions are known, timing can be added at the correct boundary so the measurement reflects only the final refit and not candidate evaluation work.",
+      "actions": "Add a wall-clock timer around the refit operation that trains the selected model on the full dataset; compute elapsed time; store it on the fitted controller object as a new attribute; ensure the attribute is only set within the refit branch and does not appear when refit is skipped.",
+      "errors": [
+        "A code edit introduced duplicate or inconsistent branching in the refit control flow; removing the redundant branch restored correct execution."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After implementing the attribute, runtime validation across configurations ensures it is set only when appropriate and behaves consistently across variants of the selection API.",
+      "actions": "Run small, targeted executions covering the main selection controllers and refit variants (enabled/disabled, multi-metric selection) to confirm the attribute exists only when refit runs and that its value is a sensible non-negative scalar.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "A new public attribute must be documented so users can discover it and understand its availability conditions without reading source code.",
+      "actions": "Update the public docstrings/API reference for the relevant selection/refit controllers to include the new attribute in the documented attributes list, describing what it measures and when it is present.",
+      "errors": [
+        "The documentation edit initially broke formatting due to missing required spacing/blank lines; adjusting the spacing corrected the rendered structure."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Automated tests provide regression protection and help confirm that timing instrumentation did not alter the refit logic or observable behavior.",
+      "actions": "Execute the automated tests most closely associated with selection and refit; if the environment has known toolchain incompatibilities, narrow to focused subsets that exercise the changed behavior and document any unrelated failures as external to the change.",
+      "errors": [
+        "A full test run failed due to an incompatibility between the test suite and the installed test framework API (an unexpected keyword argument in an assertion helper), which was unrelated to the code change; validation proceeded using targeted/filtered tests."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After test verification, documentation often needs refinement to match conventions and avoid subtle formatting issues; keeping docs accurate and clean ensures the new attribute is usable.",
+      "actions": "Refine and finalize the public API documentation for the new attribute, ensuring it appears in the correct section, uses consistent wording, and maintains proper formatting conventions.",
+      "errors": [
+        "A documentation edit inserted whitespace or a blank line in the wrong place; reverting that misplaced change and reapplying the fix in the correct location resolved the issue.",
+        "A mistaken documentation edit added an unintended blank line; undoing and correcting the placement fixed formatting."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "With tests passing, a final integration check confirms that code and documentation align and that the user-visible workflow behaves correctly end-to-end.",
+      "actions": "Perform an end-to-end run that exercises refit and confirms the new attribute is populated, then recheck that the documentation matches the implemented semantics; rerun any relevant focused tests as a final sanity check.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After documentation changes, revalidation ensures no behavioral regressions were introduced during edits and that the feature remains correct under multiple usage patterns.",
+      "actions": "Re-run representative usage scenarios (including refit enabled/disabled and multi-metric selection) and execute a relevant test subset to confirm the attribute’s presence/absence rules and value semantics still hold.",
+      "errors": [
+        "A full test run encountered an unrelated test framework API incompatibility; correctness was confirmed using targeted/filtered tests that exercise the modified behavior."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before adding instrumentation, the refit step must be precisely located to avoid timing the wrong work and to respect conditional execution paths.",
+      "actions": "Search and inspect the model-selection controller’s fit workflow to find the exact point where the selected model is retrained on the full dataset; map out the guards that enable/disable refit and any branching for multi-metric selection.",
+      "errors": [
+        "A file-search command pipeline returned a non-zero exit code due to tooling behavior even though it still produced the needed search results; the output was used to locate the correct code."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "instance_id": "django__django-16502",
+  "skill_name": "Suppress HEAD Response Bodies in Dev Servers",
+  "description": "Applies when an HTTP server implementation (often a development or embedded server) incorrectly sends a response body for HEAD requests or mishandles HEAD lifecycle semantics. This workflow locates the response-writing path, identifies the safest interception point, implements HEAD-specific body suppression without breaking header emission, and validates behavior on the wire and across edge cases.",
+  "trigger_conditions": [
+    "HEAD requests return a response body on the wire (not merely displayed by a client), violating HTTP semantics",
+    "A server implementation assumes an upstream component will strip bodies, but that stripping does not occur in some deployment mode",
+    "Users report connection-level noise (e.g., broken pipe/reset) correlated with HEAD requests or early client disconnects",
+    "Fix requires changes in the server/handler layer that finalizes and writes responses (not in application/business logic)"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The server-side codepath responsible for finalizing HTTP responses and writing response bytes to the client connection has been located and narrowed to the relevant handler component.",
+      "type": "intermediate",
+      "verification": [
+        "The specific module/class responsible for converting the application response into socket writes has been identified.",
+        "The exact point(s) where headers and body bytes are emitted to the client connection can be described (e.g., header send, body iteration/write, and finalization)."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The correct conceptual interception point for HEAD compliance has been identified by understanding the underlying response-finalization lifecycle and the available customization hooks in the server handler.",
+      "type": "intermediate",
+      "verification": [
+        "The response-finalization lifecycle is understood well enough to explain when headers are sent, when the body is iterated/written, and when finalization/close occurs.",
+        "A specific, justified hook point has been selected where HEAD body suppression can be applied while preserving correct header emission and lifecycle behavior."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The incorrect HEAD behavior has been reproduced and confirmed at the protocol level by capturing raw server output showing body bytes after headers for a HEAD request.",
+      "type": "intermediate",
+      "verification": [
+        "A deterministic reproduction captures raw bytes from the server and shows that a HEAD response includes body bytes after the header terminator.",
+        "A control comparison demonstrates expected contrast (e.g., GET legitimately includes a body; HEAD must not) through the same server path."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "A fix has been implemented in the server’s response-handling layer to prevent emitting body bytes for HEAD requests while preserving normal behavior for other HTTP methods.",
+      "type": "intermediate",
+      "verification": [
+        "For HEAD requests, no body bytes are written regardless of whether the application returns an iterable body or uses a direct write callback, while headers are still produced correctly.",
+        "For non-HEAD methods, response writing behavior remains unchanged.",
+        "The handler’s finalization/close/exception flow remains consistent with the expectations of the underlying response-handling implementation (no premature close or broken sequencing)."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "HEAD-specific edge cases have been handled correctly (including streaming/generator bodies, delayed header generation, and error paths) without crashes or lifecycle inconsistencies.",
+      "type": "intermediate",
+      "verification": [
+        "For a HEAD request to a streaming/generator response, headers are still sent and zero body bytes are emitted, and the response iterable is properly closed/consumed as required by the interface.",
+        "No handler exceptions occur due to missing headers/status, premature finalization, or incorrect ordering of header sending vs. response closure."
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The fix has been validated with targeted tests (including raw-wire verification) and broader component/regression tests, demonstrating correct HEAD behavior and no regressions.",
+      "type": "terminal",
+      "verification": [
+        "Automated or scripted checks show HEAD responses contain no body bytes on the wire while preserving correct headers across scenarios.",
+        "Relevant automated test suites for the affected server/handler components pass with the change applied."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the response-writing codepath is found, understanding the underlying handler lifecycle is necessary to choose a safe place to suppress HEAD bodies without breaking header emission or close semantics.",
+      "actions": "Study the server handler’s response-finalization flow and its underlying library/base-class behavior: how start-of-response metadata is recorded, when headers are transmitted, how the body is produced (iteration vs. write-callback), and how finalization/close is performed. Identify the smallest override/interception that can suppress body writes for HEAD while keeping the rest of the pipeline intact.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "If the response-writing component is already isolated, a straightforward implementation attempt can be made by adding a HEAD-specific branch to suppress body emission while keeping headers and status intact.",
+      "actions": "Implement a minimal handler-layer change that detects HEAD requests and ensures headers are sent but body writes are skipped. Prefer localizing changes to the response finalization/writing layer to avoid impacting application code paths for other methods.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Understanding the lifecycle is often not enough; a deterministic, protocol-level reproduction is needed to confirm the bug is real on the wire and to provide a failing baseline for validating fixes.",
+      "actions": "Build a minimal server harness that exercises the real handler stack and captures raw bytes from the connection. Avoid relying on higher-level HTTP clients that may discard bodies for HEAD automatically; use a raw socket or equivalent wire-level capture. Ensure the harness provides the required runtime context objects expected by the handler implementation.",
+      "errors": [
+        "Attempted to invoke the response handler directly without providing the required request/connection context object(s), causing attribute access failures and secondary type/IO errors."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Even with a correct hook identified, HEAD semantics interact with streaming responses where headers may not be generated until the body is iterated; HEAD handling must account for delayed header generation without emitting body bytes.",
+      "actions": "Test and debug streaming/generator response scenarios to see when headers become available. Adjust HEAD handling to trigger header generation (e.g., by consuming/advancing the iterable as required by the interface) while discarding body chunks, then finalize the response cleanly with correct close semantics.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "With a confirmed wire-level reproduction, the fix can be implemented and checked against the exact failure mode to ensure HEAD responses contain headers only.",
+      "actions": "Modify the server handler to treat HEAD specially: guarantee headers are sent, prevent any body bytes from being written (including both iterable yields and any direct write-callback path), and preserve correct finalization and close behavior. Re-run the wire-level reproduction and compare HEAD vs. GET outputs.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "If an initial fix breaks lifecycle expectations, revisiting the underlying handler semantics is required—especially for cases where headers are not available until response iteration triggers header generation.",
+      "actions": "Align the HEAD-specific branch with the underlying handler’s expected sequencing: ensure status/headers are established before finalization, avoid assuming headers exist prior to application iteration, and avoid premature close/finalization that conflicts with the base implementation. Update the approach based on how streaming apps and delayed start-of-response behave.",
+      "errors": [
+        "Assumed headers/status would be available without driving the application response iterator; in streaming/generator cases start-of-response had not been triggered, leading to missing header/status state and subsequent crashes."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After implementing the core fix, comprehensive validation is needed to ensure correctness across response patterns (iterables, write-callback, errors) and to ensure no regressions for other HTTP methods.",
+      "actions": "Add or run targeted tests that verify wire-level output for HEAD contains no body, confirm headers remain correct, and exercise variants such as streaming responses, different status codes, and applications that use the server-provided write callback. Run the broader automated test suites for the affected components and clean up any temporary debugging artifacts.",
+      "errors": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Once edge-case handling is in place (especially for streaming/delayed headers), final confirmation through both focused and broader tests reduces regression risk before completion.",
+      "actions": "Run integration-style verification using the real server entrypoint plus unit-style targeted checks for HEAD behavior, then execute relevant regression suites. Review the final change set to ensure it is minimal, well-scoped, and maintains non-HEAD behavior.",
+      "errors": []
+    },
+    {
+      "edge_id": 9,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "The workflow starts by orienting within the codebase to find the concrete place where responses are written to the client, since the fix must live where bytes are emitted rather than in higher-level application logic.",
+      "actions": "Search the codebase for the server implementation used in the affected run mode and trace the request path to the component that sends headers and writes body bytes to the connection. Use incremental, single-step exploration to avoid tooling/command issues and to maintain a clear trace from request handling to socket output.",
+      "errors": [
+        "An attempted tooling command bundled multiple actions into one invocation and was rejected; the exploration had to be retried using single, atomic commands."
+      ]
+    }
+  ]
+}

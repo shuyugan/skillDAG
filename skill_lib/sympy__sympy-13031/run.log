@@ -1,0 +1,37 @@
+2026-03-18 05:44:12,052 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-18 05:44:12,054 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] milestone extraction started
+2026-03-18 05:44:33,575 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:44:33,581 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] extraction done: 6 milestones
+2026-03-18 05:44:33,582 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] milestone extraction started
+2026-03-18 05:44:38,307 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:44:38,308 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] extraction done: 2 milestones
+2026-03-18 05:44:38,310 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] milestone extraction started
+2026-03-18 05:44:52,617 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:44:52,621 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] extraction done: 6 milestones
+2026-03-18 05:44:52,623 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] milestone extraction started
+2026-03-18 05:45:05,764 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:05,766 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] extraction done: 5 milestones
+2026-03-18 05:45:05,769 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] milestone extraction started
+2026-03-18 05:45:19,304 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:19,306 INFO workspace_state.agents.trajectory_analyzer: [sympy__sympy-13031] extraction done: 6 milestones
+2026-03-18 05:45:19,306 INFO __main__: filtered out 1 trajectory(ies) with no successful milestones
+2026-03-18 05:45:21,905 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:21,907 INFO __main__: error feedback saved: 3 lessons from 1 filtered trajectories
+2026-03-18 05:45:21,907 INFO workspace_state.agents.state_canonicalizer: state canonicalization started: 4 trajectories
+2026-03-18 05:45:34,319 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:34,320 INFO workspace_state.agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-18 05:45:40,264 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:40,272 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 0 mapped (6 milestones)
+2026-03-18 05:45:47,847 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:47,848 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 1 mapped (6 milestones)
+2026-03-18 05:45:52,763 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:52,764 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 2 mapped (5 milestones)
+2026-03-18 05:45:58,272 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:45:58,273 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 3 mapped (6 milestones)
+2026-03-18 05:45:58,274 INFO workspace_state.agents.state_canonicalizer: canonicalization done: 7 canonical states, 23 mappings
+2026-03-18 05:45:58,274 INFO workspace_state.agents.graph_builder: graph assembly started
+2026-03-18 05:45:58,274 INFO workspace_state.agents.graph_builder: graph assembly done: 8 nodes, 9 edges
+2026-03-18 05:45:58,276 INFO __main__: language generalization started
+2026-03-18 05:46:38,652 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:46:38,654 INFO __main__: generalization done: skill_name=Fix zero-dimension join regressions
+2026-03-18 05:46:38,655 INFO __main__: skill saved to /space3/shuyu/project/skillDAG/workspace_state/skill_lib/sympy__sympy-13031

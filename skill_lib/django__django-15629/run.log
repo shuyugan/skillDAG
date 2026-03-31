@@ -1,0 +1,37 @@
+2026-03-18 05:27:06,210 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-18 05:27:06,211 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] milestone extraction started
+2026-03-18 05:27:19,321 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:27:19,327 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] extraction done: 6 milestones
+2026-03-18 05:27:19,328 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] milestone extraction started
+2026-03-18 05:27:32,111 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:27:32,113 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] extraction done: 6 milestones
+2026-03-18 05:27:32,114 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] milestone extraction started
+2026-03-18 05:27:43,111 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:27:43,113 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] extraction done: 5 milestones
+2026-03-18 05:27:43,118 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] milestone extraction started
+2026-03-18 05:27:55,941 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:27:55,948 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] extraction done: 7 milestones
+2026-03-18 05:27:55,950 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] milestone extraction started
+2026-03-18 05:28:06,934 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:06,936 INFO workspace_state.agents.trajectory_analyzer: [django__django-15629] extraction done: 6 milestones
+2026-03-18 05:28:06,936 INFO workspace_state.agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-18 05:28:20,176 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:20,177 INFO workspace_state.agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-18 05:28:27,692 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:27,693 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 0 mapped (6 milestones)
+2026-03-18 05:28:32,807 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:32,808 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 1 mapped (6 milestones)
+2026-03-18 05:28:39,238 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:39,239 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 2 mapped (5 milestones)
+2026-03-18 05:28:47,842 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:47,843 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 3 mapped (7 milestones)
+2026-03-18 05:28:53,627 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:28:53,635 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 4 mapped (6 milestones)
+2026-03-18 05:28:53,635 INFO workspace_state.agents.state_canonicalizer: removed 1 unused canonical state(s): ['S3']
+2026-03-18 05:28:53,636 INFO workspace_state.agents.state_canonicalizer: canonicalization done: 6 canonical states, 30 mappings
+2026-03-18 05:28:53,636 INFO workspace_state.agents.graph_builder: graph assembly started
+2026-03-18 05:28:53,636 INFO workspace_state.agents.graph_builder: graph assembly done: 7 nodes, 9 edges
+2026-03-18 05:28:53,638 INFO __main__: language generalization started
+2026-03-18 05:29:24,850 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:29:24,851 INFO __main__: generalization done: skill_name=Propagate schema attributes to relation columns
+2026-03-18 05:29:24,852 INFO __main__: skill saved to /space3/shuyu/project/skillDAG/workspace_state/skill_lib/django__django-15629

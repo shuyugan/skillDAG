@@ -1,0 +1,35 @@
+2026-03-18 05:20:14,091 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-18 05:20:14,093 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] milestone extraction started
+2026-03-18 05:20:32,900 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:20:32,906 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] extraction done: 7 milestones
+2026-03-18 05:22:14,451 INFO __main__: construct_from_scratch: 4 attempt dirs
+2026-03-18 05:22:14,454 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] milestone extraction started
+2026-03-18 05:22:30,427 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:22:30,433 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] extraction done: 7 milestones
+2026-03-18 05:22:30,436 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] milestone extraction started
+2026-03-18 05:22:49,001 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:22:49,004 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] extraction done: 7 milestones
+2026-03-18 05:22:49,011 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] milestone extraction started
+2026-03-18 05:23:03,087 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:23:03,089 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] extraction done: 6 milestones
+2026-03-18 05:23:03,096 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] milestone extraction started
+2026-03-18 05:23:20,752 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:23:20,754 INFO workspace_state.agents.trajectory_analyzer: [django__django-11276] extraction done: 6 milestones
+2026-03-18 05:23:20,754 INFO workspace_state.agents.state_canonicalizer: state canonicalization started: 4 trajectories
+2026-03-18 05:23:34,396 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:23:34,405 INFO workspace_state.agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-18 05:23:40,589 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:23:40,590 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 0 mapped (7 milestones)
+2026-03-18 05:23:48,491 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:23:48,492 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 1 mapped (7 milestones)
+2026-03-18 05:23:56,262 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:23:56,263 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 2 mapped (6 milestones)
+2026-03-18 05:24:02,836 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:24:02,837 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 3 mapped (6 milestones)
+2026-03-18 05:24:02,838 INFO workspace_state.agents.state_canonicalizer: canonicalization done: 7 canonical states, 26 mappings
+2026-03-18 05:24:02,838 INFO workspace_state.agents.graph_builder: graph assembly started
+2026-03-18 05:24:02,839 INFO workspace_state.agents.graph_builder: graph assembly done: 8 nodes, 11 edges
+2026-03-18 05:24:02,840 INFO __main__: language generalization started
+2026-03-18 05:24:44,119 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:24:44,121 INFO __main__: generalization done: skill_name=Swap Custom Escaper for Stdlib
+2026-03-18 05:24:44,124 INFO __main__: skill saved to /space3/shuyu/project/skillDAG/workspace_state/skill_lib/django__django-11276

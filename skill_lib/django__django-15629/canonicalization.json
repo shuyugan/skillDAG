@@ -1,0 +1,248 @@
+{
+  "canonical_states": [
+    {
+      "state_id": "S1",
+      "description": "Codebase and relevant ORM/migration code locations for relation fields and schema generation are identified",
+      "type": "normal",
+      "verification": [
+        "Can point to the specific Django source files/classes responsible for relation fields (e.g., ForeignKey/OneToOne) and schema SQL generation (schema editor)",
+        "Can identify the exact method(s) where db_parameters/db_type are computed for relation fields"
+      ]
+    },
+    {
+      "state_id": "S2",
+      "description": "Root cause established: db_collation metadata is not propagated from referenced fields to referencing relation columns, leading to MySQL FK collation mismatch",
+      "type": "normal",
+      "verification": [
+        "Can explain why the generated ALTER TABLE for the FK column lacks COLLATE while the referenced PK/unique column includes it",
+        "Can identify the specific place in relation-field parameter computation where collation is dropped/never provided"
+      ]
+    },
+    {
+      "state_id": "S4",
+      "description": "Code change implemented to include collation in relation-field database parameters so schema/migrations can emit COLLATE on referencing columns when needed",
+      "type": "normal",
+      "verification": [
+        "A patch exists that updates relation-field db_parameters (or equivalent) to return a non-null 'collation' when the referenced field defines one",
+        "Generated column definitions for FK/OneToOne fields now have access to the collation value used by schema editors/backends"
+      ]
+    },
+    {
+      "state_id": "S5",
+      "description": "Behavior verified with targeted programmatic checks demonstrating correct collation propagation and correct no-op behavior when targets lack collation",
+      "type": "normal",
+      "verification": [
+        "A runnable script/test asserts relation_field.db_parameters()['collation'] matches the referenced field’s collation for FK/OneToOne (including to_field variants)",
+        "A control case confirms collation remains None when the referenced field does not specify db_collation"
+      ]
+    },
+    {
+      "state_id": "S6",
+      "description": "Regression testing completed by running relevant Django test suites covering schema/migrations/related fields with the change applied",
+      "type": "normal",
+      "verification": [
+        "Relevant upstream test labels/suites for schema and migrations execute successfully in the environment",
+        "No new failures are introduced in tests covering foreign objects/relationship fields"
+      ]
+    },
+    {
+      "state_id": "S7",
+      "description": "Fix finalized and ready for submission: scope checked (e.g., relationship types) and changes cleaned up/documented as needed",
+      "type": "terminal",
+      "verification": [
+        "Can justify that the change applies to the intended relationship field types (and that others do not need separate handling or are covered indirectly)",
+        "Final diff is minimal, coherent, and all verification steps (targeted checks + test suites) pass on the patched tree"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "traj_index": 0,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Although the attempt failed (bad command formatting and wrong repo path), the agent was still at the earliest stage—trying to locate the Django codebase/ORM locations, which corresponds to initial codebase identification."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 2,
+      "state_id": "S1",
+      "reason": "Successfully found the real source tree and identified relevant source file locations and key methods for relation fields/schema generation, meeting S1 verification."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 3,
+      "state_id": "S2",
+      "reason": "Established and explained the root cause: related/FK fields were not providing collation metadata via db_parameters while schema editor expects it, aligning with S2."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "Implemented the actual code change to propagate collation into related-field db_parameters output, which is exactly the patch-level capability described in S4."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Ran targeted verification and also executed relevant Django test suites with success; this includes S5 behavior checks but reaches the higher milestone of completed regression testing per S6."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 6,
+      "state_id": "S6",
+      "reason": "The submission/finalization attempt errored and the trajectory remains unresolved; per error-handling guidance the agent remains at the last confirmed successful capability level (tests/verification completed), i.e., S6 rather than terminal S7."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone establishes the Django source tree location and readiness to investigate the ORM/migration code paths responsible for relation fields and schema generation."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Inspection of ForeignKey/Field db_parameters and db_collation handling identifies that collation metadata is not being propagated to FK columns, explaining the mismatch in generated SQL."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "Implements the code change in related field db_parameters to include collation derived from the referenced target field, making collation available to schema generation."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Runs targeted programmatic assertions showing FK/OneToOne db_parameters()['collation'] matches the referenced field and remains None when the target has no collation."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Executes relevant Django test suites via runtests.py after resolving invocation issues, indicating regression testing for schema/migrations/related fields has been completed successfully."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "Reviews scope across relationship field types (e.g., confirms no extra changes needed) and prepares the final submission, indicating the fix is finalized and ready."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Although the attempt failed due to command formatting, the intent and activity were initial codebase reconnaissance to locate relation-field and schema-generation code; capability remains at the earliest identification stage."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "The milestone explicitly traces ForeignKey db_type/db_parameters and how db_collation is handled/consumed, concluding the root cause is missing collation propagation to FK columns."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "A concrete patch was implemented to include the referenced field’s collation in relation-field db_parameters so schema generation can emit COLLATE for FK/OneToOne columns."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Targeted programmatic verification was added and run, asserting collation is propagated when present on the target field and remains None when absent."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Relevant Django test suites were executed successfully to regression-test schema/migrations/related-field behavior after the change, matching the regression-testing completion criterion."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone centers on orienting in the repo and learning command constraints while trying to locate relevant Django source areas; this aligns best with identifying code locations for relation fields and schema generation."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "It explicitly inspects related-field db parameter computation and concludes why collation is not propagated, matching the defined root-cause state."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "A concrete code change is made to relationship-field db_parameters to include collation derived from the referenced field, which is exactly the implementation checkpoint."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Runs a focused script asserting collation propagation for FK/OneToOne including to_field and a None-control case, satisfying the targeted verification criteria."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 5,
+      "state_id": "S7",
+      "reason": "Assesses scope/relationship types (ManyToMany via through-table FKs) to justify coverage, which is part of finalizing readiness and scope-checking for submission."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 6,
+      "state_id": "S6",
+      "reason": "Executes relevant Django test suites via the native runner after pytest was unavailable, completing regression testing per the criteria."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 7,
+      "state_id": "S6",
+      "reason": "This is an error/premature submit; per the rule for error milestones, the agent remains at the last successfully achieved capability level (regression tests completed) rather than reaching the terminal finalized state."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Although the step errored due to command formatting, the intent was initial codebase discovery and no further capability beyond the earliest file-location identification stage was achieved."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 2,
+      "state_id": "S1",
+      "reason": "This was another failed attempt (missing checkout path) before establishing root cause or implementing changes; the agent still remained at the initial repository/location identification stage."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 3,
+      "state_id": "S1",
+      "reason": "Successfully located the relevant Django related-field source file(s) and key methods for relation fields, satisfying the verification for identifying where relation-field parameters are computed."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 4,
+      "state_id": "S2",
+      "reason": "Established the root cause that ForeignKey db_parameters lacked/failed to propagate collation metadata needed for schema generation, matching the collation-drop explanation required by S2."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 5,
+      "state_id": "S4",
+      "reason": "Implemented the actual code change to propagate collation from the referenced field into relation-field db_parameters (via a delegating db_collation/property and inclusion in parameters), which is exactly S4."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 6,
+      "state_id": "S6",
+      "reason": "Performed targeted validation and also ran relevant Django test suites for schema/migrations/related fields to check for regressions, meeting S6’s regression-testing verification."
+    }
+  ],
+  "removed_states": [
+    {
+      "state_id": "S3",
+      "description": "Propagation approach decided: referencing relation columns should inherit/derive collation from the referenced target field (including to_field cases)",
+      "type": "normal",
+      "reason": "defined by state generator but no milestone mapped to it"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+[
+  {
+    "edge_id": 1,
+    "transition": "S1 -> S2",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 0,
+        "from_milestone": 1,
+        "to_milestone": 2
+      },
+      {
+        "traj_index": 1,
+        "from_milestone": 1,
+        "to_milestone": 2
+      }
+    ]
+  },
+  {
+    "edge_id": 2,
+    "transition": "S1 -> S5",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 2,
+        "from_milestone": 1,
+        "to_milestone": 2
+      }
+    ]
+  },
+  {
+    "edge_id": 3,
+    "transition": "S2 -> S3",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 0,
+        "from_milestone": 2,
+        "to_milestone": 3
+      },
+      {
+        "traj_index": 1,
+        "from_milestone": 2,
+        "to_milestone": 3
+      }
+    ]
+  },
+  {
+    "edge_id": 4,
+    "transition": "S2 -> S6",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 2,
+        "from_milestone": 4,
+        "to_milestone": 5
+      }
+    ]
+  },
+  {
+    "edge_id": 5,
+    "transition": "S3 -> S5",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 0,
+        "from_milestone": 4,
+        "to_milestone": 5
+      },
+      {
+        "traj_index": 1,
+        "from_milestone": 3,
+        "to_milestone": 4
+      }
+    ]
+  },
+  {
+    "edge_id": 6,
+    "transition": "S5 -> S2",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 2,
+        "from_milestone": 3,
+        "to_milestone": 4
+      }
+    ]
+  },
+  {
+    "edge_id": 7,
+    "transition": "S5 -> S7",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 0,
+        "from_milestone": 5,
+        "to_milestone": 6
+      },
+      {
+        "traj_index": 1,
+        "from_milestone": 4,
+        "to_milestone": 5
+      }
+    ]
+  },
+  {
+    "edge_id": 8,
+    "transition": "S6 -> S7",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 2,
+        "from_milestone": 5,
+        "to_milestone": 6
+      }
+    ]
+  },
+  {
+    "edge_id": 9,
+    "transition": "__START__ -> S1",
+    "type": "normal",
+    "contributors": [
+      {
+        "traj_index": 0,
+        "from_milestone": null,
+        "to_milestone": 1
+      },
+      {
+        "traj_index": 1,
+        "from_milestone": null,
+        "to_milestone": 1
+      },
+      {
+        "traj_index": 2,
+        "from_milestone": null,
+        "to_milestone": 1
+      }
+    ]
+  }
+]

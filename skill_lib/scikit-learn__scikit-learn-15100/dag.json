@@ -1,0 +1,148 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-15100",
+  "skill_name": "Fix Unicode normalization short-circuits",
+  "description": "Addresses bugs in text-processing utilities where Unicode normalization and downstream transformations (e.g., diacritic removal) behave inconsistently depending on whether input text is already normalized. Apply when equivalent Unicode representations yield different outputs due to early-return or bypass logic.",
+  "trigger_conditions": [
+    "Text-processing output differs for visually identical strings that use different Unicode compositions (precomposed vs decomposed + combining marks).",
+    "A helper performs Unicode normalization and has conditional logic that skips subsequent processing when the normalized form matches the input.",
+    "A bug report includes a minimal reproduction using combining characters or canonical/compatibility forms (e.g., NFC/NFD/NFKC/NFKD).",
+    "The desired behavior is representation-invariant (same semantic text should yield the same processed output)."
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The responsible implementation location for the Unicode text transformation is identified.",
+      "type": "intermediate",
+      "verification": [
+        "The exact function/method responsible for the transformation has been located in the codebase.",
+        "The specific logic region that performs Unicode normalization and/or contains a conditional bypass/early-return has been pinpointed."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The root cause has been identified: already-normalized inputs with combining marks bypass the intended transformation due to short-circuit control flow.",
+      "type": "intermediate",
+      "verification": [
+        "A clear explanation exists for why already-normalized strings containing combining characters remain unchanged (e.g., an early return when normalization output equals input).",
+        "A concrete example pair (composed vs decomposed) has been identified that demonstrates the faulty control flow and inconsistent output."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "A code change has been implemented so the transformation is applied after normalization even when normalization does not change the input.",
+      "type": "intermediate",
+      "verification": [
+        "The implementation normalizes to the chosen Unicode form and then performs the intended filtering/transformation unconditionally (no shortcut that skips processing for already-normalized input).",
+        "The updated code is consistent with project style and builds/runs without introducing new warnings or type/behavior mismatches for typical edge inputs."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "The minimal reproduction has been re-run and confirms the fix: equivalent composed and decomposed inputs now yield identical transformed output.",
+      "type": "intermediate",
+      "verification": [
+        "Running the minimal reproduction demonstrates that both precomposed characters and decomposed sequences with combining marks now produce the same expected result."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "The fix has been validated against a broader set of representative and boundary Unicode inputs without regressions.",
+      "type": "intermediate",
+      "verification": [
+        "Additional checks cover empty and ASCII-only inputs, combining-mark-only sequences, multiple combining marks, and representative non-Latin text, and the behavior remains sensible and stable."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "The project's automated tests relevant to the text-processing area have passed with the change applied.",
+      "type": "terminal",
+      "verification": [
+        "The relevant automated test subset (and/or full suite) completes successfully with no failures attributable to the change."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the relevant implementation is located, inspecting its normalization and control flow is necessary to explain why certain Unicode representations bypass the intended processing.",
+      "actions": "Review the transformation function’s steps around normalization and any equality checks, early returns, or conditional branches; reason through execution for both composed and decomposed inputs that should be treated equivalently.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After confirming the bypass mechanism, the code must be adjusted so representation-invariant behavior is guaranteed by applying the transformation regardless of whether normalization changes the string.",
+      "actions": "Refactor the logic to always normalize to the intended form and then always apply the downstream transformation (e.g., remove combining marks) without conditional short-circuits; keep the change minimal and aligned with existing conventions.",
+      "errors": [
+        "An initial fix added unnecessary exception-handling complexity (e.g., a broad try/except) and was later removed to keep the implementation minimal and straightforward."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "A targeted regression check against the original minimal reproduction verifies that the change addresses the specific inconsistent behavior reported.",
+      "actions": "Re-run the minimal reproduction using composed vs decomposed/combining-mark inputs and assert the outputs match the expected transformed result.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "Beyond the minimal reproduction, broader manual/scripted checks help ensure the unconditional-processing change does not introduce subtle issues across common input patterns.",
+      "actions": "Run a small set of additional representative inputs spanning ASCII, empty strings, already-normalized variants, and combining-mark scenarios to sanity-check behavior after the refactor.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "Even after confirming the reported case is fixed, validating more edge cases increases confidence that the transformation is robust for varied Unicode text.",
+      "actions": "Add or run additional edge-case examples (combining-only, multiple combining marks, mixed scripts) and compare results against expected invariants (e.g., no unexpected changes to plain ASCII).",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "If the reported scenario is fixed, running the automated tests provides stronger assurance that related functionality and integration points remain correct.",
+      "actions": "Execute the relevant automated test suite for the affected text-processing area (optionally alongside targeted manual checks) and confirm there are no regressions.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After broader edge-case validation, the final gate is confirming the project’s automated tests pass to ensure the change is safe to merge.",
+      "actions": "Run the appropriate test subset or full test suite and review failures to confirm none are introduced by the change.",
+      "errors": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before diagnosis and fixing can begin, the code path implementing the reported behavior must be found to enable inspection and modification.",
+      "actions": "Search the codebase for the transformation’s public API name and any internal helpers; follow references from call sites to the core implementation until the normalization and filtering logic is located.",
+      "errors": [
+        "Repository search was initially run from an incorrect or non-existent directory path, requiring correction to search from the actual project root."
+      ]
+    }
+  ]
+}

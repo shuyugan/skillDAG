@@ -1,0 +1,7 @@
+{
+  "common_errors": [
+    "Submit exactly one executable command per step in the required format; avoid bundling multiple actions or mixing command text with other content when a single command is expected.",
+    "After a tooling or formatting rejection, correct the issue and re-run the intended command before proceeding; don’t skip directly to completion without evidence of progress.",
+    "Do not declare the task complete without making substantive changes (when needed) and verifying them via appropriate tests or reproducible checks."
+  ]
+}

@@ -1,0 +1,36 @@
+2026-03-18 05:29:25,016 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-18 05:29:25,017 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] milestone extraction started
+2026-03-18 05:29:43,539 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:29:43,545 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] extraction done: 7 milestones
+2026-03-18 05:29:43,546 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] milestone extraction started
+2026-03-18 05:29:54,886 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:29:54,887 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] extraction done: 5 milestones
+2026-03-18 05:29:54,888 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] milestone extraction started
+2026-03-18 05:29:59,966 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:29:59,968 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] extraction done: 2 milestones
+2026-03-18 05:29:59,969 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] milestone extraction started
+2026-03-18 05:30:05,399 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:05,401 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] extraction done: 2 milestones
+2026-03-18 05:30:05,403 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] milestone extraction started
+2026-03-18 05:30:21,167 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:21,169 INFO workspace_state.agents.trajectory_analyzer: [django__django-16502] extraction done: 6 milestones
+2026-03-18 05:30:21,169 INFO __main__: filtered out 2 trajectory(ies) with no successful milestones
+2026-03-18 05:30:23,625 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:23,627 INFO __main__: error feedback saved: 3 lessons from 2 filtered trajectories
+2026-03-18 05:30:23,627 INFO workspace_state.agents.state_canonicalizer: state canonicalization started: 3 trajectories
+2026-03-18 05:30:37,958 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:37,960 INFO workspace_state.agents.state_canonicalizer: step 2a done: 7 canonical states defined
+2026-03-18 05:30:44,213 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:44,214 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 0 mapped (7 milestones)
+2026-03-18 05:30:49,937 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:49,939 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-18 05:30:57,267 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:30:57,269 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 2 mapped (6 milestones)
+2026-03-18 05:30:57,269 INFO workspace_state.agents.state_canonicalizer: removed 1 unused canonical state(s): ['S4']
+2026-03-18 05:30:57,269 INFO workspace_state.agents.state_canonicalizer: canonicalization done: 6 canonical states, 18 mappings
+2026-03-18 05:30:57,270 INFO workspace_state.agents.graph_builder: graph assembly started
+2026-03-18 05:30:57,270 INFO workspace_state.agents.graph_builder: graph assembly done: 7 nodes, 9 edges
+2026-03-18 05:30:57,271 INFO __main__: language generalization started
+2026-03-18 05:31:32,711 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:31:32,713 INFO __main__: generalization done: skill_name=Suppress HEAD Response Bodies in Dev Servers
+2026-03-18 05:31:32,714 INFO __main__: skill saved to /space3/shuyu/project/skillDAG/workspace_state/skill_lib/django__django-16502

@@ -1,0 +1,168 @@
+{
+  "instance_id": "django__django-15629",
+  "skill_name": "Propagate schema attributes to relation columns",
+  "description": "Applies when an ORM or schema generator creates relationship/foreign-key columns whose database-specific attributes (e.g., collation/charset) must match the referenced column. Use this workflow to trace where column metadata is computed, implement attribute propagation for relation fields, and validate via focused checks plus regression tests.",
+  "trigger_conditions": [
+    "Generated schema/migration SQL creates a constraint that fails due to mismatched column attributes between referenced and referencing columns (e.g., collation/charset/type modifiers).",
+    "A model/field option applied to a primary/unique column is reflected in that column’s DDL but is missing from the DDL for relation/foreign-key columns that reference it.",
+    "Relationship fields derive their database type from a target field, but additional target-field database parameters are not being carried through to schema generation.",
+    "A backend requires exact attribute compatibility for constraint creation, and migrations omit required attributes on referencing columns."
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "Relevant code locations for relationship field definitions and schema/migration SQL generation have been identified.",
+      "type": "intermediate",
+      "verification": [
+        "The modules/classes responsible for relationship fields and for emitting column/constraint DDL have been located.",
+        "The specific method(s) where database parameters (type, modifiers, extra attributes) are computed for relationship fields have been identified."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "Root cause has been established: a database attribute defined on the referenced field is not being propagated into the referencing relationship column’s database parameters, enabling an attribute mismatch at constraint creation time.",
+      "type": "intermediate",
+      "verification": [
+        "A clear explanation exists for why the referenced column’s DDL includes the attribute while the referencing column’s DDL does not.",
+        "The exact relationship-field code path where the attribute is dropped, never computed, or not returned to schema generation has been pinpointed."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "A code change has been implemented so relationship fields expose the referenced field’s relevant database attribute(s) through their database-parameter interface, allowing schema/migrations to emit compatible column definitions.",
+      "type": "intermediate",
+      "verification": [
+        "A patch updates relationship-field database-parameter computation to provide a non-null value for the missing attribute when the referenced field defines one.",
+        "Schema/DDL generation for relationship columns now has access to the propagated attribute value via the standard database-parameter plumbing."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Behavior has been verified with targeted programmatic checks showing correct attribute propagation for relationship fields and correct no-op behavior when the referenced field does not define the attribute.",
+      "type": "intermediate",
+      "verification": [
+        "A runnable check/test asserts the relationship field’s computed database parameters include the expected attribute value matching the referenced field (including variants that reference a non-default target column).",
+        "A control case confirms the attribute remains unset/None when the referenced field does not specify it."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "Regression testing has been completed by running relevant automated tests covering schema generation, migrations, and relationship-field behavior with the change applied.",
+      "type": "intermediate",
+      "verification": [
+        "Relevant test suites for schema/DDL generation and migrations complete successfully in the execution environment.",
+        "No new failures appear in tests covering relationship fields or constraint generation."
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "Fix has been finalized and is ready for submission, with scope validated across relationship types and verification artifacts cleaned up as appropriate.",
+      "type": "terminal",
+      "verification": [
+        "The applicability to intended relationship types (and any types that do not require separate handling) has been assessed and can be justified.",
+        "The final change set is minimal and coherent, and all verification steps (targeted checks and automated tests) pass on the patched codebase."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the relevant modules are located, the next step is to trace how referenced-field attributes are computed and consumed so the precise drop point in the relationship-field parameter flow can be identified.",
+      "actions": "Inspect the relationship-field implementation and compare its database-parameter computation with that of the referenced base field; then follow how schema/DDL generation consumes those parameters to understand why the attribute is missing on referencing columns.",
+      "errors": [
+        "Assumed an incorrect working-tree/source location and initially navigated to a non-existent directory before finding the actual source tree.",
+        "Assumed a fix already existed in another checkout/location, delaying investigation of the real code path."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "After identifying where the attribute is lost, implement propagation by wiring the referenced field’s attribute into the relationship field’s database parameters so downstream DDL generation can output compatible columns.",
+      "actions": "Update relationship-field database-parameter computation to delegate or copy the relevant attribute from the referenced field (or its computed parameters) and ensure the attribute is returned through the standard interface consumed by schema/DDL generation.",
+      "errors": [
+        "An initial edit did not actually change the effective code path, requiring a corrected modification to apply the intended behavior."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "With the patch in place, a fast, deterministic check at the parameter-computation level confirms the new metadata flow without requiring full database integration.",
+      "actions": "Write and run a small programmatic check/test that instantiates representative relationship fields and asserts their computed database parameters include the propagated attribute when present, and remain unset when absent.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Automated regression tests are needed to ensure schema/migration generation and related-field behavior remain correct across the broader system beyond the targeted checks.",
+      "actions": "Run the project’s relevant automated test suites for schema/DDL generation, migrations, and relationship/constraint handling using the repository’s supported test runner for the environment.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Even after targeted checks pass, validating with the official test harness avoids false confidence caused by using an unsupported runner or missing environment configuration.",
+      "actions": "Execute tests using the project’s canonical test entrypoint and correct labels/options for the environment; adjust the invocation method if the initially chosen runner is unavailable.",
+      "errors": [
+        "A preferred test runner was unavailable and direct test invocation failed due to incorrect configuration/labels; switching to the project’s native test runner resolved execution."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Before finalizing, confirm whether other relationship constructs rely on the updated relationship-field logic or require separate propagation to avoid incomplete fixes.",
+      "actions": "Review other relationship field types and how their underlying join/through columns are created, determining whether they reuse the updated parameter computation or need analogous changes.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After regression tests succeed, validate the scope and ensure no additional relationship types need changes, then prepare a clean, minimal final patch.",
+      "actions": "Audit nearby database-parameter implementations for related field types, confirm coverage, remove temporary verification artifacts if needed, and ensure the final diff reflects only necessary changes.",
+      "errors": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S7",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "If final review reveals missing verification, re-run the project’s official automated tests using a supported runner to confirm readiness for submission.",
+      "actions": "Run the repository’s supported test harness and relevant suites/labels for schema, migrations, and relationship fields; avoid relying on tools not guaranteed in the environment.",
+      "errors": [
+        "A commonly used test runner was not available in the environment, requiring use of the project’s built-in/native test runner instead."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "At the start, the workflow requires establishing the correct repository layout and constraints of the execution environment so investigation proceeds in the right location with compatible command formatting.",
+      "actions": "Locate the actual source tree and identify key modules by exploring the repository incrementally; follow the environment’s interaction constraints (e.g., one command/action at a time) to avoid rejected steps.",
+      "errors": [
+        "Multiple actions were issued in a single step and were rejected by the environment, requiring adherence to a single-action format.",
+        "Attempted to change into a directory that did not exist due to an incorrect assumption about the source-tree location."
+      ]
+    }
+  ]
+}

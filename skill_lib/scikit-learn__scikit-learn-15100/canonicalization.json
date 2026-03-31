@@ -1,0 +1,213 @@
+{
+  "canonical_states": [
+    {
+      "state_id": "S1",
+      "description": "Relevant implementation location for unicode accent stripping is identified.",
+      "type": "normal",
+      "verification": [
+        "Can name the exact module/file and function responsible for unicode accent stripping (e.g., strip_accents_unicode).",
+        "Can point to the specific code region/branch controlling normalization and/or early-return behavior."
+      ]
+    },
+    {
+      "state_id": "S2",
+      "description": "Root cause is identified: NFKD-normalized inputs with combining marks bypass stripping due to short-circuit logic.",
+      "type": "normal",
+      "verification": [
+        "Can explain why already-NFKD strings containing combining characters remain unchanged (e.g., early return when normalization output equals input).",
+        "Can identify an input example (composed vs decomposed) that demonstrates the faulty control flow."
+      ]
+    },
+    {
+      "state_id": "S3",
+      "description": "Fix is implemented to always remove combining characters after NFKD normalization, regardless of whether normalization changes the string.",
+      "type": "normal",
+      "verification": [
+        "Code now performs NFKD normalization and filters out combining marks unconditionally (no behavioral short-circuit for already-normalized input).",
+        "The implementation compiles/lints and preserves expected handling for non-unicode/edge inputs per project conventions."
+      ]
+    },
+    {
+      "state_id": "S4",
+      "description": "Reported bug reproduction confirms the fix: composed and decomposed forms strip to identical unaccented output.",
+      "type": "normal",
+      "verification": [
+        "Running the minimal reproduction shows both precomposed and decomposed representations (e.g., ñ vs n + combining tilde) strip to the same result (e.g., 'n')."
+      ]
+    },
+    {
+      "state_id": "S5",
+      "description": "Fix is validated against broader edge cases beyond the minimal reproduction.",
+      "type": "normal",
+      "verification": [
+        "Additional manual or scripted checks cover empty/ASCII, combining-only sequences, multiple combining marks, and representative non-Latin inputs without regressions."
+      ]
+    },
+    {
+      "state_id": "S6",
+      "description": "Project test suite (relevant feature-extraction/text tests) passes with the change applied.",
+      "type": "terminal",
+      "verification": [
+        "Automated tests for feature_extraction/text (and/or full suite as run) complete successfully with no failures attributable to the change."
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "traj_index": 0,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone outcome is locating the exact file/function implementing unicode accent stripping, satisfying the requirement to name the module/function and point to the relevant code region."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "It identifies the specific faulty control flow: an early return when NFKD normalization output equals input, which causes already-decomposed strings with combining marks to bypass stripping."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "The function is changed to always NFKD-normalize and then unconditionally remove combining marks (removing short-circuit behavior), matching the described fix implementation criteria."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "It verifies the minimal reproduction: composed and decomposed forms now strip to identical unaccented output via assertions."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "This milestone includes running the existing feature-extraction/text test suite successfully; as the final milestone in a resolved trajectory it must map to the terminal 'tests pass' state."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "The milestone successfully locates the exact repository module containing the accent-stripping helper, satisfying identification of the relevant implementation location."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "The milestone identifies the specific short-circuit/early-return logic that prevents stripping combining marks when the input is already NFKD, matching the stated root cause."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "The function is modified to unconditionally filter combining characters after NFKD normalization, removing the bypass logic and implementing the required fix."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "The originally reported composed vs decomposed reproduction is rerun and confirmed to produce identical unaccented outputs, demonstrating the fix works for the minimal case."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "This milestone includes running the feature-extraction text test suite successfully; as the trajectory is resolved, the last milestone must map to the terminal state where automated tests pass."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone describes locating and navigating to the exact unicode accent stripping implementation (strip_accents_unicode), satisfying identification of the relevant module/function and code region."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Milestone analyzes strip_accents_unicode control flow and identifies the root cause involving NFKD normalization and early-return/short-circuit behavior that leaves combining marks intact."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Milestone implements the fix to always remove combining characters after NFKD normalization, removing an unnecessary try/except and keeping an unconditional combining-mark filter as required."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Milestone includes both confirming the minimal reproduction and running additional edge-case checks; this goes beyond reproduction into broader validation, matching the edge-case validation state."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Milestone runs the relevant pytest feature-extraction/text tests and confirms they pass, which is the terminal automated test-suite-passing checkpoint."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone states the unicode accent-stripping implementation location was found; this matches identifying the exact module/function and relevant code region."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Analyzes strip_accents_unicode control flow and identifies the early-return/short-circuit that fails for already-NFKD strings with combining marks, matching the specified root cause."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Implements the fix by removing the early return so combining marks are always filtered after NFKD normalization, aligning with the requirement for unconditional combining-character removal."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "Runs a minimal reproduction confirming composed and decomposed inputs now strip to the same unaccented output, satisfying the reported-bug verification."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 5,
+      "state_id": "S5",
+      "reason": "Performs broader edge-case checks (ASCII/empty/combining-only/multiple marks, etc.), matching validation beyond the minimal reproduction."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 6,
+      "state_id": "S6",
+      "reason": "Automated feature-extraction/text tests are executed and pass, which is the terminal verification criterion."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "The milestone explicitly locates the repository module/file implementing unicode accent stripping, satisfying the requirement to identify the exact implementation location."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "The milestone analyzes control flow and identifies the early-return/short-circuit behavior that leaves combining marks in already-NFKD input, matching the stated root cause."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "The described change removes combining characters from the NFKD-normalized string unconditionally, eliminating the short-circuit and implementing the required fix."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "A minimal reproduction is run and confirms composed and decomposed forms now strip to the same unaccented output, which is exactly the reproduction-based verification."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "This milestone includes running the existing feature-extraction text test suite successfully; since the trajectory is resolved, the last milestone must map to the terminal state representing passing automated tests."
+    }
+  ]
+}

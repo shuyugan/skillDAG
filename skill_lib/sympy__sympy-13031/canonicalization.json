@@ -1,0 +1,207 @@
+{
+  "canonical_states": [
+    {
+      "state_id": "S1",
+      "description": "Issue reproduction setup established and observed behavior captured for the reported hstack/vstack zero-dimension case",
+      "type": "normal",
+      "verification": [
+        "Can run a minimal script that prints the unexpected vs expected .shape results for the reported stacking inputs",
+        "Can state which SymPy version/checkout the observation corresponds to"
+      ]
+    },
+    {
+      "state_id": "S2",
+      "description": "Relevant stacking/join implementation locations identified (hstack/vstack and underlying row_join/col_join code paths)",
+      "type": "normal",
+      "verification": [
+        "Can point to the source files/classes where hstack/vstack dispatch and row_join/col_join are implemented",
+        "Can explain which lower-level join method hstack/vstack ultimately uses for composition"
+      ]
+    },
+    {
+      "state_id": "S3",
+      "description": "Expected semantics for stacking zero-row/zero-column matrices confirmed from baseline behavior and/or existing regression tests",
+      "type": "normal",
+      "verification": [
+        "Can cite an existing test (or equivalent assertion) encoding the intended shape outcome for 0-row/0-col stacking",
+        "Can demonstrate the expected behavior on at least one matrix type/path that already behaves correctly"
+      ]
+    },
+    {
+      "state_id": "S4",
+      "description": "Scope narrowed to the specific matrix class/implementation where behavior diverges (e.g., SparseMatrix vs dense Matrix)",
+      "type": "normal",
+      "verification": [
+        "Can show a comparative reproduction across matrix classes where only a subset exhibits the incorrect stacked shape",
+        "Can name the responsible class/module that needs modification"
+      ]
+    },
+    {
+      "state_id": "S5",
+      "description": "Root cause identified as incorrect empty-matrix handling in join logic that discards or fails to accumulate dimensions for zero-element shapes",
+      "type": "normal",
+      "verification": [
+        "Can point to the exact conditional/branch responsible (e.g., a truthiness/emptiness shortcut) and explain why it misclassifies 0-row/0-col matrices",
+        "Can articulate how the faulty branch leads to the observed wrong final stacked shape (loss of accumulated columns/rows)"
+      ]
+    },
+    {
+      "state_id": "S6",
+      "description": "Code fix implemented to make join/stack dimension handling shape-aware and consistent with the generic/common matrix semantics",
+      "type": "normal",
+      "verification": [
+        "A patch exists that modifies the relevant join/stack logic to avoid treating any zero-element matrix as 'empty' in a way that drops shape information",
+        "The updated logic preserves correct error behavior for incompatible joins (e.g., mismatched dimensions still raise)"
+      ]
+    },
+    {
+      "state_id": "S7",
+      "description": "Fix validated by targeted reproductions and by running relevant matrix test coverage (or invoking the specific regression tests) with passing results",
+      "type": "terminal",
+      "verification": [
+        "The original reported reproduction now returns the expected stacked shapes for the affected matrix class (including 0-row/0-col edge cases)",
+        "Relevant matrix tests/regression checks execute successfully in the available test runner and cover the modified code paths"
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "traj_index": 0,
+      "milestone_id": 1,
+      "state_id": "S2",
+      "reason": "The milestone’s achieved capability is locating the relevant hstack/vstack and join (row_join/col_join) implementation code paths, matching the identification requirement for stacking/join locations."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 2,
+      "state_id": "S3",
+      "reason": "It confirms the expected semantics by demonstrating the dense/common stacking path already produces the correct shapes, serving as a baseline behavior consistent with intended zero-dimension stacking."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "It explicitly finds and validates an existing regression test encoding the intended 0-row hstack behavior, satisfying the verification criteria for confirmed expected semantics via tests."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "It narrows to SparseMatrix and identifies the specific faulty falsy/empty-matrix shortcut in sparse join logic that drops shape accumulation, which is the defined root-cause state."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "A concrete patch is implemented to make sparse row_join/col_join shape-aware and avoid treating zero-element matrices as empty in a way that discards dimensions, matching the fix-implemented state."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "The fix is validated with targeted reproductions and relevant matrix test subsets are run; despite an unrelated pre-existing failure, the modified code paths are exercised and the reported behavior is verified as corrected, meeting the terminal validation criteria."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 1,
+      "state_id": "S2",
+      "reason": "After resolving the initial command-format hiccup, the milestone ends with the repository layout inspected and next investigation targets identified, aligning with locating relevant stacking/join implementation areas rather than a confirmed reproduction."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 2,
+      "state_id": "S3",
+      "reason": "Milestone confirms baseline/expected behavior for dense matrices via a reproduction script and reviews generic hstack/row_join, satisfying confirmation of intended semantics on a path that already behaves correctly."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "Shows divergence between dense and SparseMatrix by inspecting overridden sparse join paths and reproducing incorrect sparse hstack/vstack shapes, narrowing scope to the sparse implementation."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Identifies the exact faulty branch/condition (truthiness/emptiness check) in SparseMatrix join methods and explains the needed shape-aware logic, matching root-cause identification for empty-matrix handling that drops shape."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Implements the code change in sparse join logic to use dimension-specific checks and verifies the edits, constituting an implemented fix to preserve shape-aware join/stack semantics."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "Validates the fix with targeted reproductions and runs relevant matrix tests via sympy.test (despite initial test-invocation issues), meeting the terminal validation criteria with tests passing for the modified paths."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Successfully established the reproduction setup in the correct repo location and observed the reported stacking shape behavior."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Located and inspected hstack implementation and the underlying row_join logic, identifying the relevant code path used for stacking."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 3,
+      "state_id": "S2",
+      "reason": "Reviewed version/git history and compared to a historical fix, but did not newly establish expected semantics via tests nor narrow to a divergent class/root-cause branch; remains at code-path understanding level."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 4,
+      "state_id": "S3",
+      "reason": "Confirmed expected semantics using direct assertions and identified/executed existing regression tests for the zero-dimension stacking behavior (even though full test runner invocation was unavailable)."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 5,
+      "state_id": "S3",
+      "reason": "Outcome was an error while attempting broader test execution and premature submission without a patch; capability did not advance beyond having confirmed expected behavior/tests."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 1,
+      "state_id": "S2",
+      "reason": "Milestone centers on locating the repository source tree and identifying where the relevant hstack/vstack and shaping/join code lives, matching the requirement to identify implementation locations and dispatch paths."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 2,
+      "state_id": "S3",
+      "reason": "It reruns the reproduction for dense Matrix and establishes baseline/expected stacking semantics for zero-dimension matrices on a path that behaves correctly, aligning with confirming intended semantics."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 3,
+      "state_id": "S4",
+      "reason": "Compares multiple matrix classes and finds the divergence is specific to SparseMatrix, which satisfies narrowing scope to the responsible implementation."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Pinpoints the exact faulty logic in SparseMatrix join methods (falsy/emptiness checks and early returns) and explains how it drops dimensional contributions, matching root-cause identification."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Implements a code change replacing broad emptiness early-returns with shape-aware handling in SparseMatrix joins to preserve dimensions while keeping error behavior, matching the fix-implemented state."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "Validates the patch with targeted reproductions and runs relevant SymPy matrix tests via an available runner, satisfying the terminal state requiring passing verification of the fix."
+    }
+  ]
+}

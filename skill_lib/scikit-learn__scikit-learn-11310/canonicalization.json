@@ -1,0 +1,210 @@
+{
+  "canonical_states": [
+    {
+      "state_id": "S1",
+      "description": "Refit execution point within BaseSearchCV.fit is located and understood (including refit=False and multi-metric refit control flow).",
+      "type": "normal",
+      "verification": [
+        "Can point to the specific code block/function where best_estimator_ is refit on the full dataset.",
+        "Can explain the conditions under which that block runs (e.g., refit=False skip; callable/string refit in multi-metric)."
+      ]
+    },
+    {
+      "state_id": "S2",
+      "description": "Refit duration is instrumented and persisted as a new attribute refit_time_ on the fitted search object when refitting occurs.",
+      "type": "normal",
+      "verification": [
+        "After a successful fit with refit enabled, the object exposes refit_time_ populated from wall-clock timing around the refit operation.",
+        "The attribute is not created (or remains unset) when refit is disabled."
+      ]
+    },
+    {
+      "state_id": "S3",
+      "description": "Conditional semantics of refit_time_ are validated across key configurations (GridSearchCV/RandomizedSearchCV, refit=False, multi-metric refit variants).",
+      "type": "normal",
+      "verification": [
+        "Empirical checks show refit_time_ is a numeric scalar (e.g., float) and non-negative when refit runs.",
+        "Empirical checks show refit_time_ is absent/unavailable when refit=False, including in multi-metric settings."
+      ]
+    },
+    {
+      "state_id": "S4",
+      "description": "Automated test impact is assessed and relevant unit tests for search/refit behavior pass (or are shown unaffected), isolating unrelated infrastructure failures if present.",
+      "type": "normal",
+      "verification": [
+        "Targeted model_selection/search tests covering refit behavior pass with the change applied.",
+        "Any failing tests are demonstrated to be unrelated to the refit_time_ change (e.g., external pytest API incompatibility) and are excluded/isolated."
+      ]
+    },
+    {
+      "state_id": "S5",
+      "description": "Public API documentation is updated to include refit_time_ for GridSearchCV and RandomizedSearchCV, including when it is available.",
+      "type": "normal",
+      "verification": [
+        "Docstrings/Attributes sections for both classes mention refit_time_ with a correct description and availability conditions.",
+        "Documentation formatting builds/reads correctly (no malformed sections or missing spacing)."
+      ]
+    },
+    {
+      "state_id": "S6",
+      "description": "Feature is fully integrated: refit_time_ is implemented, documented, and validated end-to-end without regressions in supported refit modes.",
+      "type": "terminal",
+      "verification": [
+        "Running an end-to-end search with refit enabled produces expected search outputs plus a correctly populated refit_time_.",
+        "Running with refit disabled preserves prior behavior and does not expose refit_time_."
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "traj_index": 0,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "The milestone is about locating and understanding the exact refit code path and its control flow within BaseSearchCV.fit, identifying where instrumentation should be added."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "It implements timing around the refit operation and stores the elapsed wall-clock duration on the fitted search object as refit_time_, conditioned on refit being enabled."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "It validates conditional semantics across GridSearchCV/RandomizedSearchCV, refit=False, and multi-metric refit variants, checking presence/absence and value/type expectations for refit_time_."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "It assesses automated test impact by running relevant tests and isolating an unrelated pytest incompatibility, demonstrating refit-related tests are unaffected by the change."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 5,
+      "state_id": "S5",
+      "reason": "It updates the public API documentation/docstrings for both GridSearchCV and RandomizedSearchCV to include the new refit_time_ attribute with correct formatting and availability description."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone identifies and inspects the exact BaseSearchCV.fit refit location and explains the control flow conditions for when refitting occurs, matching the refit execution point understanding criteria."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Milestone implements timing around the refit branch and persists the elapsed wall time as refit_time_ on the fitted search object, with semantics tied to when refit runs."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Milestone empirically validates conditional presence and numeric non-negative scalar behavior of refit_time_ across GridSearchCV/RandomizedSearchCV, refit=False, and multi-metric refit variants."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "Milestone assesses test impact by running relevant model_selection/search tests and isolates an unrelated pytest infrastructure failure, confirming refit-related tests are unaffected."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Milestone completes documentation updates and performs end-to-end validation (behavior + formatting + filtered tests), satisfying the terminal integrated feature criteria."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone focuses on locating the exact refit execution point in BaseSearchCV.fit and understanding where to insert the new attribute/docs, matching the requirement to identify the refit block and its control-flow conditions."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Milestone implements wall-clock timing around the refit operation and stores it as an attribute on the fitted search object, aligning with adding/persisting refit_time_ when refitting occurs."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 3,
+      "state_id": "S5",
+      "reason": "Milestone updates the public docstrings for GridSearchCV/RandomizedSearchCV to document the new attribute and fixes formatting, which corresponds to the documentation update state."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 4,
+      "state_id": "S6",
+      "reason": "Milestone performs end-to-end validation across refit enabled/disabled and multi-metric refit modes, and runs targeted tests while isolating unrelated pytest issues, indicating the feature is implemented, validated, and integrated without regressions."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone focuses on locating and understanding the exact refit execution point inside BaseSearchCV.fit and the control flow around when refitting occurs."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Implements wall-clock timing around the refit block and stores it on the fitted search object as a new attribute (refit_time_) when refitting occurs."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Empirically validates the conditional presence/absence and numeric semantics of refit_time_ across GridSearchCV/RandomizedSearchCV, refit=False, and multi-metric refit configurations."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "Runs and filters relevant automated tests, identifies an unrelated pytest compatibility failure, and confirms refit/search-related tests are unaffected by the change."
+    },
+    {
+      "traj_index": 3,
+      "milestone_id": 5,
+      "state_id": "S5",
+      "reason": "Updates public API documentation/docstrings for both GridSearchCV and RandomizedSearchCV to include refit_time_ and its availability conditions, fixing formatting issues."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone locates and inspects BaseSearchCV.fit to identify the exact refit block and its control flow, matching the requirement to understand where/when refit runs."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Implements wall-clock timing around the refit step and persists it as refit_time_ when refit is enabled, satisfying instrumentation-and-attribute criteria."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Empirically verifies conditional behavior of refit_time_ across GridSearchCV/RandomizedSearchCV and refit=False, including presence/absence and numeric type/value."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 4,
+      "state_id": "S4",
+      "reason": "Runs focused refit-related unit tests and isolates an unrelated pytest incompatibility failure, demonstrating relevant tests pass and failures are not due to refit_time_."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 5,
+      "state_id": "S5",
+      "reason": "Updates the public API documentation for both GridSearchCV and RandomizedSearchCV to include refit_time_ and its availability conditions."
+    },
+    {
+      "traj_index": 4,
+      "milestone_id": 6,
+      "state_id": "S6",
+      "reason": "Performs expanded end-to-end validation (including multi-metric refit variants and refit=False) and broader testing, indicating the feature is implemented, documented, and robust without regressions."
+    }
+  ]
+}

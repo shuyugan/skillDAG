@@ -1,0 +1,167 @@
+{
+  "instance_id": "sympy__sympy-12489",
+  "skill_name": "Fix subclass-preserving object construction",
+  "description": "Addresses bugs where subclassing a core type fails because internal constructors/factories hard-code the base class or use module-level aliases that bypass the dynamic class. Apply when instances created through helper functions, alternate input forms, or fast paths return base-class objects instead of subclass instances.",
+  "trigger_conditions": [
+    "A subclass constructor call returns an instance of the base class for some inputs or code paths",
+    "Object creation flows through internal helper/factory functions rather than directly using the class passed to __new__",
+    "There are module-level aliases or cached references to the base class used in allocation (e.g., Base = ...; helper uses Base)",
+    "Early-return/fast-path branches in __new__ (copy/resize/coercion paths) allocate objects without referencing the calling class"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "Repository workspace and the implementation location of the affected class and its construction helpers have been identified.",
+      "type": "intermediate",
+      "verification": [
+        "The repository root can be located reliably in the current environment and the relevant source tree is accessible",
+        "The file(s) containing the class definition and its construction helpers/factories can be opened and referenced",
+        "The sections responsible for instance allocation (e.g., __new__ and any helper factory) can be pinpointed in the working tree"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The instance-creation call chain and the exact points where the dynamic class is bypassed have been mapped and understood.",
+      "type": "intermediate",
+      "verification": [
+        "The end-to-end allocation flow has been traced (entrypoint constructor → helper/factory → low-level allocator) with the type actually allocated at each step identified",
+        "At least one concrete bypass mechanism has been identified (e.g., hard-coded base class passed to the allocator or a module-level alias that fixes the allocated type)"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The subclassing failure has been reproduced with a minimal example and the affected construction branches have been enumerated.",
+      "type": "intermediate",
+      "verification": [
+        "A minimal reproduction exists that shows a subclass call returning a base-class instance for at least one supported input/creation form",
+        "The specific constructor inputs/branches that fail versus those that succeed have been listed (including any direct helper/factory invocation paths)"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "A primary internal factory/constructor path has been updated to allocate instances using the calling class rather than a hard-coded base class.",
+      "type": "intermediate",
+      "verification": [
+        "The internal helper/factory used by the constructor now allocates using the class it is invoked with (e.g., via a classmethod or equivalent) rather than a fixed base-class reference",
+        "The minimal reproduction demonstrates that at least one previously failing helper-mediated path now returns an instance of the subclass"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "All remaining constructor branches that allocate new objects have been made subclass-preserving, including early-return, copy, and resize/coercion paths.",
+      "type": "intermediate",
+      "verification": [
+        "All allocation sites reachable from the constructor use class-aware allocation (no remaining hard-coded base-class allocation in constructor-controlled paths)",
+        "The reproduction coverage spans multiple construction forms and confirms subclass instance preservation across them, including any copy/resize/coercion fast paths present in the implementation"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The change has been validated with targeted subclass regression checks and the project’s available automated tests relevant to the affected component.",
+      "type": "terminal",
+      "verification": [
+        "The available automated tests for the affected component (and any closely related suites) run successfully using the environment’s supported test runner",
+        "Custom regression checks confirm that all previously identified failing construction paths now return subclass instances while expected behavior for the base class remains unchanged"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the implementation is located, the next step is to understand how objects are actually allocated so the subclassing bypass can be precisely identified rather than guessed.",
+      "actions": "Inspect the constructor and any helper/factory functions it calls; trace which class object is passed through each layer; locate any cached/base-class aliases or helper bindings that force allocation of the base type.",
+      "errors": [
+        "Searched in an incorrect or non-existent repository location due to wrong environment assumptions about the working directory."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "A quick reproduction can confirm the bug and provide an executable target before deeply analyzing the full call chain.",
+      "actions": "Create a minimal subclass and exercise multiple supported construction forms; record the returned types; narrow down which input forms trigger base-class allocation.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After understanding the allocation pipeline, targeted tests can be designed to hit the exact branches where the dynamic class is being bypassed.",
+      "actions": "Translate the identified allocation steps and branch conditions into focused subclass instantiation checks; include direct calls to any internal helper/factory that may be part of the public or semi-public API surface.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "With failing paths demonstrated, fixing the central factory/helper to respect the calling class often resolves the majority of subclassing issues with minimal surface-area change.",
+      "actions": "Refactor the helper/factory to accept or derive the dynamic class and allocate via that class; update constructor branches to call the helper through the dynamic class (or pass cls explicitly) instead of using module-level or base-class-bound references.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Some subclassing leaks come from additional early-return or fast-path branches that bypass the central helper, so all allocation branches must be audited and aligned.",
+      "actions": "Audit all constructor branches that can return a new object (copy/resize/coercion/special input forms); replace any base-class allocations with class-aware allocations; ensure internal calls route through cls-aware helpers consistently.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After a partial fix, validation is needed to ensure behavior is preserved and that the environment’s available test tooling is used correctly.",
+      "actions": "Re-run the minimal subclass reproductions for the previously failing paths; run the component’s test suite using the supported in-repo test runner or programmatic test entrypoint when common CLI tools are unavailable.",
+      "errors": [
+        "The expected external test runner was unavailable and a module-based CLI test invocation failed due to a missing entrypoint; tests had to be executed via the project’s in-process/programmatic test runner instead."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Once all known allocation sites are updated, comprehensive validation ensures the change fixes subclassing without breaking existing semantics and confirms coverage of the earlier failing paths.",
+      "actions": "Execute focused subclass regression checks covering all construction forms; run the relevant automated test suites using whatever runner is supported in the environment; review diffs and remove any temporary debugging artifacts.",
+      "errors": [
+        "The expected external test runner was not installed and a module-based CLI invocation was unsupported; validation required using the project’s programmatic test runner."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S7",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "If tests or regressions reveal a remaining leak, iteration is required to locate the last hard-coded allocation path and update it to use class-aware construction.",
+      "actions": "Use the failing regression to identify the specific branch still allocating the base class (often a copy/resize/coercion path); update that branch to allocate via the calling class and re-run the same validations.",
+      "errors": []
+    },
+    {
+      "edge_id": 9,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before debugging or fixing, the code responsible for object construction must be found and opened in the correct repository workspace, adapting to execution environment constraints.",
+      "actions": "Locate the repository root; search for the class definition and its constructor/helper functions; open the relevant files; adapt command usage to the environment’s execution constraints (e.g., one command per invocation).",
+      "errors": [
+        "An initial attempt bundled multiple commands in one action and was rejected by the execution harness.",
+        "Searched using an incorrect assumed repository path, causing file lookups to fail until the correct root was found.",
+        "Command formatting or environment constraints (e.g., single-action requirement) caused initial search attempts to fail."
+      ]
+    }
+  ]
+}

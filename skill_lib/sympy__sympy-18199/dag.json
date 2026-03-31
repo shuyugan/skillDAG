@@ -1,0 +1,211 @@
+{
+  "instance_id": "sympy__sympy-18199",
+  "skill_name": "Add modular zero-case guard",
+  "description": "Addresses bugs in modular equation solvers where a degenerate residue class (typically 0 modulo the modulus) is not handled consistently across algorithm branches. Apply when a solver routes special inputs into subroutines that assume invertible/nonzero residues, leading to missing solutions or runtime errors.",
+  "trigger_conditions": [
+    "A modular root/solver function returns incomplete results or raises for inputs where the right-hand side is congruent to 0 modulo the modulus",
+    "The implementation uses multiple algorithm branches with differing domain assumptions (e.g., requires multiplicative inverses, discrete logs, or group operations)",
+    "At least one internal helper implicitly assumes the residue is nonzero/unit, but the public API accepts general residues",
+    "Reported issue mentions “missing 0 solution”, “log of 0”, or failures that depend on parameter relationships that select a specialized branch"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The solver’s main entry point, the relevant helper routines it dispatches to, and the existing test locations covering this solver have been identified and can be navigated.",
+      "type": "intermediate",
+      "verification": [
+        "The source location of the solver entry point and the key branch/dispatch logic can be identified",
+        "The source locations of the primary helper routines used by the solver can be identified",
+        "The existing automated tests (or closest related tests) exercising this solver can be located"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The solver’s control flow is understood well enough to predict which algorithm branch is taken for different parameter relationships, and where the degenerate residue case (e.g., output target congruent to 0) would be handled or skipped.",
+      "type": "intermediate",
+      "verification": [
+        "The major conditional branches that decide which algorithm is used can be described in terms of input relationships and constraints",
+        "The specific helper routine(s) executed in the problematic configuration can be identified",
+        "Any assumptions those helper routine(s) make about inputs (e.g., requiring nonzero/unit residues) can be stated"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "Current behavior for the degenerate residue case has been reproduced and characterized with at least one concrete input showing an incorrect result (e.g., missing the zero solution) or an exception.",
+      "type": "intermediate",
+      "verification": [
+        "At least one specific input tuple demonstrating the incorrect behavior or crash has been recorded",
+        "The behavior can be reproduced on demand with captured output and/or traceback"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "The root cause has been pinpointed to a specific branch/helper that applies operations invalid for the degenerate residue case (e.g., performing group/log/inverse computations on a non-unit such as 0).",
+      "type": "intermediate",
+      "verification": [
+        "The exact code path/location performing an invalid operation for the degenerate residue case can be identified",
+        "The reason that branch is selected for the failing input pattern can be explained",
+        "The reason the operation is invalid under the helper’s domain assumptions can be explained"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "The mathematically correct expected behavior and the API’s return-shape semantics have been determined for the degenerate residue case, including differences between single-solution and all-solutions modes.",
+      "type": "intermediate",
+      "verification": [
+        "The expected solution set for the degenerate residue case under the function’s documented domain assumptions can be stated",
+        "The expected return format for single-solution versus all-solutions modes is defined consistently with existing API conventions"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "A safe guard has been implemented so the degenerate residue case is handled before entering incompatible algorithms, and the solver returns the correct solution(s) without triggering invalid internal operations.",
+      "type": "intermediate",
+      "verification": [
+        "There is an explicit check/guard for the degenerate residue case at an appropriate centralized point (typically near the solver entry) or in a shared validation layer",
+        "Previously failing inputs no longer raise exceptions and now return the expected solution(s)",
+        "Normal-path behavior for non-degenerate residues is preserved (no unintended change in outputs for representative nonzero/unit cases)"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The change has been validated with targeted reproducers and broader non-regression checks using whatever test tooling is available in the environment.",
+      "type": "intermediate",
+      "verification": [
+        "Targeted calls including the reproducer now return expected results post-fix",
+        "A broader sanity check (existing automated tests, a relevant subset, or manual sweeps) has been run and shows no obvious regressions for typical non-degenerate inputs"
+      ]
+    },
+    {
+      "node_id": "S8",
+      "state": "Automated regression coverage has been added or updated to include the degenerate residue case, and the tests pass in the local environment.",
+      "type": "terminal",
+      "verification": [
+        "A regression test exists that asserts correct output for inputs where the right-hand side is congruent to 0 modulo the modulus (including single-solution and/or all-solutions modes as applicable)",
+        "The added/updated tests execute successfully with the available test runner in the environment"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the relevant code locations are known, understanding how the solver dispatches across algorithms is necessary to reason about whether and where the degenerate residue case might be bypassing proper handling.",
+      "actions": "Read through the solver’s branch/dispatch logic and follow calls into helper routines. Map which input relationships select each branch, and note any helper preconditions about invertibility/nonzero residues.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Before over-indexing on code reading, quickly reproducing the issue can confirm whether the report matches current behavior and can reveal that only certain parameter combinations trigger the failure.",
+      "actions": "Run a small set of direct calls around the reported inputs and nearby variations. Include cases where the right-hand side is congruent to 0 modulo the modulus and vary parameters that influence branching to see when outputs differ or errors occur.",
+      "errors": [
+        "Initial manual checks on a narrow set of inputs appeared correct, leading to an incorrect conclusion that no bug existed.",
+        "A reproducer was assumed from the report but local runs did not fail for that exact example, delaying discovery of the actual failing configuration.",
+        "Early exploratory tests suggested the issue was already fixed, which postponed identification of the real trigger pattern."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Using control-flow knowledge to guide experiments helps select inputs that drive execution into the suspected branch, turning an intermittent/parameter-dependent issue into a deterministic reproducer.",
+      "actions": "Craft targeted inputs based on branch conditions to force the solver into different algorithm paths, especially those known to rely on multiplicative-group operations. Record which branches are taken and whether the degenerate residue case triggers incorrect results or exceptions.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "After observing incorrect behavior, the next step is to isolate the precise failing branch and confirm the exception or missing-solution mechanism is tied to an invalid operation on a non-unit residue.",
+      "actions": "Construct additional inputs that deterministically select the failing branch. Use traces/logging or step-through inspection to identify which helper call fails and what invalid assumption it makes about the residue.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "To implement a correct fix, the expected mathematical result and the API’s output conventions must be clarified so the guard returns the right value(s) in all modes.",
+      "actions": "Determine the correct solution set for the degenerate residue case under the solver’s stated domain (e.g., constraints on modulus type). Align with existing conventions for returning a single representative solution versus all solutions, and decide what should happen when no solutions exist.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S3",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "With a reproducer in hand, implementing a minimal early guard can prevent invalid helper usage and ensure correct outputs, but edits must be done carefully to avoid introducing accidental logic duplication or malformed conditions.",
+      "actions": "Add a centralized conditional that detects the degenerate residue case and returns the correct solution(s) according to API semantics, placed before any helper that assumes invertibility/nonzero inputs. Review the surrounding conditionals to ensure the new guard does not duplicate or shadow existing checks.",
+      "errors": [
+        "A quick automated edit introduced a duplicated conditional statement, requiring follow-up cleanup to restore correct control flow.",
+        "An initial patch accidentally duplicated an existing condition, which had to be manually removed to avoid inconsistent branching."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Once the exact invalid operation is known, the most robust remedy is to short-circuit before that operation, ensuring the degenerate residue case never reaches helpers with incompatible assumptions.",
+      "actions": "Insert an early-return guard at the solver entry (or the earliest common pre-dispatch point) so inputs congruent to 0 modulo the modulus are handled immediately. Ensure the guard is placed after any mandatory input validation but before specialized algorithms are selected.",
+      "errors": [
+        "A patch attempt introduced a duplicated conditional line during editing and had to be corrected to restore clean, unambiguous branching."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After defining expected behavior, implementing the guard should match the documented return format; minor formatting/structure issues can creep in during insertion and should be cleaned up.",
+      "actions": "Implement the degenerate-case return path to match single-solution versus all-solutions semantics. Normalize formatting and keep the change minimal to reduce risk of altering unrelated behavior.",
+      "errors": [
+        "An edit introduced extra blank lines/formatting noise that was later removed to keep the change clean."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Post-change validation is required to confirm the fix addresses both missing-solution and crash variants and that other branches still behave correctly; when the usual test runner is unavailable, fallback validation approaches are needed.",
+      "actions": "Run the reproducer and a matrix of representative inputs across different parameter regimes (including non-degenerate residues) to confirm correctness. Execute the most relevant available tests; if the standard runner is unavailable, run tests via alternative supported entry points or by importing and invoking test functions directly.",
+      "errors": [
+        "Standard test tooling was unavailable in the environment, preventing running the full automated test suite as usual.",
+        "Attempts to use a common test runner failed due to missing modules/tools, requiring switching to an alternative built-in runner or direct test-function invocation.",
+        "The expected test harness could not be executed (missing dependencies), so verification had to be done through ad-hoc scripts and direct imports instead."
+      ]
+    },
+    {
+      "edge_id": 10,
+      "from_node": "S7",
+      "to_node": "S8",
+      "type": "normal",
+      "thought": "To prevent regressions, the newly fixed degenerate-input behavior should be captured in automated tests, ideally both as a direct example and within any existing property/loop-based coverage.",
+      "actions": "Add a focused regression test asserting the correct output for the degenerate residue case, and optionally extend existing parameterized/property tests to include the degenerate residue value. Re-run the relevant test subset/file to confirm the new coverage passes.",
+      "errors": []
+    },
+    {
+      "edge_id": 11,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Effective debugging and fixing requires first locating the implementation, its dependencies, and existing tests to understand current behavior and where to place a robust, centralized fix.",
+      "actions": "Search the codebase for the solver entry point and related helpers. Identify where branching decisions and input validation occur, and locate the nearest relevant tests to use for reproduction and later regression coverage.",
+      "errors": []
+    }
+  ]
+}

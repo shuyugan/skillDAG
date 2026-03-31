@@ -1,0 +1,298 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-11310",
+  "nodes": [
+    {
+      "node_id": "S1",
+      "raw_state": "Refit execution point within BaseSearchCV.fit is located and understood (including refit=False and multi-metric refit control flow).",
+      "type": "intermediate",
+      "raw_verification": [
+        "Can point to the specific code block/function where best_estimator_ is refit on the full dataset.",
+        "Can explain the conditions under which that block runs (e.g., refit=False skip; callable/string refit in multi-metric)."
+      ],
+      "action_examples": [
+        "Searched the codebase for BaseSearchCV and inspected the implementation of the search module to locate where refitting occurs within the fit workflow.",
+        "Searched the codebase for the BaseSearchCV implementation and inspected the fit method to pinpoint where the best estimator is refit.",
+        "Searched the codebase for BaseSearchCV and inspected the implementation of its fit method to locate the refit block and related documented attributes.",
+        "Located the implementation of the search CV base class and inspected the `fit` method to identify where refitting the best estimator occurs.",
+        "Searched the repository for the BaseSearchCV implementation and inspected the main search module to locate the fit() method and the refit block."
+      ],
+      "intent_examples": [
+        "Identify the exact code path to instrument for measuring refit duration.",
+        "Identify the exact location to instrument refitting time and understand existing control flow around refit and scoring modes.",
+        "Identify the exact refit execution point and the appropriate places to add a new timing attribute and its documentation.",
+        "Find the exact code region to instrument for measuring refit duration.",
+        "Identify the exact code location where the best estimator is refit so timing can be added correctly."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "raw_state": "Refit duration is instrumented and persisted as a new attribute refit_time_ on the fitted search object when refitting occurs.",
+      "type": "intermediate",
+      "raw_verification": [
+        "After a successful fit with refit enabled, the object exposes refit_time_ populated from wall-clock timing around the refit operation.",
+        "The attribute is not created (or remains unset) when refit is disabled."
+      ],
+      "action_examples": [
+        "Added a time dependency and instrumented the refit section to record elapsed wall time and store it on the estimator as refit_time_.",
+        "Added a time import and modified the refit branch in the search fit routine to measure elapsed wall time and store it on the fitted search object as refit_time_.",
+        "Added a time import and instrumented the refit section to measure elapsed wall-clock time and store it on the estimator as an attribute during refit.",
+        "Added a timing dependency and instrumented the refit block to record elapsed wall-clock time into a new attribute during refitting.",
+        "Added a time module import and instrumented the refit section in fit() to record elapsed wall-clock time into a new refit_time_ attribute when refit is enabled."
+      ],
+      "intent_examples": [
+        "Expose how long the final best-model refit on the full dataset takes, independent of parallel CV execution.",
+        "Expose the duration of refitting the best estimator on the full dataset as a first-class result attribute.",
+        "Expose the runtime cost of refitting the best estimator on the full dataset after the search completes.",
+        "Expose a direct measurement of best-estimator refit time independent of parallelized CV execution time.",
+        "Expose the duration of the final best-model refit as a first-class attribute independent of parallel CV execution timing."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "raw_state": "Conditional semantics of refit_time_ are validated across key configurations (GridSearchCV/RandomizedSearchCV, refit=False, multi-metric refit variants).",
+      "type": "intermediate",
+      "raw_verification": [
+        "Empirical checks show refit_time_ is a numeric scalar (e.g., float) and non-negative when refit runs.",
+        "Empirical checks show refit_time_ is absent/unavailable when refit=False, including in multi-metric settings."
+      ],
+      "action_examples": [
+        "Executed targeted runtime checks using GridSearchCV/RandomizedSearchCV, including refit=False and multi-metric refit settings, to confirm attribute presence/absence and type/value expectations.",
+        "Executed small Python checks to confirm refit_time_ is a positive float when refit happens, and absent when refit=False; validated behavior for grid search, randomized search, and multi-metric refit.",
+        "Ran targeted Python checks to confirm `refit_time_` exists and is a positive float when refit runs, and absent when refit is disabled; verified across grid, randomized, and multi-metric refit modes.",
+        "Created and executed a Python verification script covering GridSearchCV, RandomizedSearchCV, and refit=False to confirm presence/absence and type/value of refit_time_."
+      ],
+      "intent_examples": [
+        "Validate correctness across common configurations and confirm the attribute is only created when applicable.",
+        "Ensure the new attribute is correctly set only when applicable and works across key API configurations.",
+        "Validate correct attribute presence/absence semantics and ensure it works for key configurations.",
+        "Validate the new attribute works end-to-end and matches expected conditional availability semantics."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "raw_state": "Automated test impact is assessed and relevant unit tests for search/refit behavior pass (or are shown unaffected), isolating unrelated infrastructure failures if present.",
+      "type": "intermediate",
+      "raw_verification": [
+        "Targeted model_selection/search tests covering refit behavior pass with the change applied.",
+        "Any failing tests are demonstrated to be unrelated to the refit_time_ change (e.g., external pytest API incompatibility) and are excluded/isolated."
+      ],
+      "action_examples": [
+        "Ran the module’s test suite, diagnosed an unrelated pytest API incompatibility failure, and re-ran a focused subset (refit-related and excluding the known-bad test) to ensure no regressions from the change.",
+        "Ran model_selection search tests; diagnosed an unrelated pytest compatibility failure; reran targeted and filtered subsets to validate the change doesn’t break refit-related functionality.",
+        "Executed the module test suite, diagnosed an unrelated pytest-API compatibility failure, then reran refit-focused and filtered tests to validate the change does not introduce regressions.",
+        "Ran upstream test suite portions; diagnosed an unrelated pytest compatibility failure, then executed focused refit-related tests to confirm changes didn’t break relevant behavior."
+      ],
+      "intent_examples": [
+        "Ensure the code change doesn’t break existing behavior while accounting for a pre-existing test environment issue.",
+        "Confirm the change is compatible with the existing test suite and isolate unrelated infrastructure failures.",
+        "Ensure existing functionality remains intact while accounting for pre-existing test incompatibilities.",
+        "Ensure correctness against existing tests while isolating unrelated infrastructure failures."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "raw_state": "Public API documentation is updated to include refit_time_ for GridSearchCV and RandomizedSearchCV, including when it is available.",
+      "type": "intermediate",
+      "raw_verification": [
+        "Docstrings/Attributes sections for both classes mention refit_time_ with a correct description and availability conditions.",
+        "Documentation formatting builds/reads correctly (no malformed sections or missing spacing)."
+      ],
+      "action_examples": [
+        "Updated public docstrings for GridSearchCV and RandomizedSearchCV to document the new refit_time_ attribute, correcting formatting after an initial misplaced edit attempt.",
+        "Updated the public docstrings for both search CV classes to document the new timing attribute and ensured formatting consistency.",
+        "Updated the public API documentation by adding `refit_time_` to the documented attributes for both grid and randomized search estimators, correcting formatting issues introduced during editing.",
+        "Updated public documentation by adding refit_time_ to the Attributes sections for both GridSearchCV and RandomizedSearchCV."
+      ],
+      "intent_examples": [
+        "Make the new attribute discoverable and properly described for users.",
+        "Make the new attribute discoverable and clearly specified in the public API documentation.",
+        "Make the new attribute discoverable and consistent with other documented refit-dependent attributes.",
+        "Make the new API discoverable and clarify when the attribute is available."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "raw_state": "Feature is fully integrated: refit_time_ is implemented, documented, and validated end-to-end without regressions in supported refit modes.",
+      "type": "terminal",
+      "raw_verification": [
+        "Running an end-to-end search with refit enabled produces expected search outputs plus a correctly populated refit_time_.",
+        "Running with refit disabled preserves prior behavior and does not expose refit_time_."
+      ],
+      "action_examples": [
+        "Updated public documentation blocks in the search estimator docstrings to include the new refit_time_ attribute for both grid and randomized search, then revalidated formatting and reran filtered tests and an end-to-end reproduction script.",
+        "Created and executed a small validation script covering refit enabled/disabled and multi-metric refit-as-string scenarios, then ran relevant pytest subsets and reviewed diffs.",
+        "Revalidated with an expanded script (multi-metric refit via scorer name, multi-metric refit=False, unsupervised fit without y) and ran a broader test selection excluding the known-broken case."
+      ],
+      "intent_examples": [
+        "Make the new attribute discoverable and ensure documentation and behavior remain consistent after edits.",
+        "Confirm the attribute exists only when refit occurs, behaves as expected across variants, and does not break existing behavior.",
+        "Confirm robustness across common configuration variants and provide higher confidence in compatibility."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "raw_state": "Start",
+      "type": "start",
+      "raw_verification": [],
+      "action_examples": [],
+      "intent_examples": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "action_examples": [
+        "Added a time dependency and instrumented the refit section to record elapsed wall time and store it on the estimator as refit_time_.",
+        "Added a time import and modified the refit branch in the search fit routine to measure elapsed wall time and store it on the fitted search object as refit_time_.",
+        "Added a time import and instrumented the refit section to measure elapsed wall-clock time and store it on the estimator as an attribute during refit.",
+        "Added a timing dependency and instrumented the refit block to record elapsed wall-clock time into a new attribute during refitting.",
+        "Added a time module import and instrumented the refit section in fit() to record elapsed wall-clock time into a new refit_time_ attribute when refit is enabled."
+      ],
+      "intent_examples": [
+        "Expose how long the final best-model refit on the full dataset takes, independent of parallel CV execution.",
+        "Expose the duration of refitting the best estimator on the full dataset as a first-class result attribute.",
+        "Expose the runtime cost of refitting the best estimator on the full dataset after the search completes.",
+        "Expose a direct measurement of best-estimator refit time independent of parallelized CV execution time.",
+        "Expose the duration of the final best-model refit as a first-class attribute independent of parallel CV execution timing."
+      ],
+      "error_examples": [
+        "A scripted edit introduced a duplicate else block, which was then removed to restore correct control flow."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "action_examples": [
+        "Executed targeted runtime checks using GridSearchCV/RandomizedSearchCV, including refit=False and multi-metric refit settings, to confirm attribute presence/absence and type/value expectations.",
+        "Executed small Python checks to confirm refit_time_ is a positive float when refit happens, and absent when refit=False; validated behavior for grid search, randomized search, and multi-metric refit.",
+        "Ran targeted Python checks to confirm `refit_time_` exists and is a positive float when refit runs, and absent when refit is disabled; verified across grid, randomized, and multi-metric refit modes.",
+        "Created and executed a Python verification script covering GridSearchCV, RandomizedSearchCV, and refit=False to confirm presence/absence and type/value of refit_time_."
+      ],
+      "intent_examples": [
+        "Validate correctness across common configurations and confirm the attribute is only created when applicable.",
+        "Ensure the new attribute is correctly set only when applicable and works across key API configurations.",
+        "Validate correct attribute presence/absence semantics and ensure it works for key configurations.",
+        "Validate the new attribute works end-to-end and matches expected conditional availability semantics."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S5",
+      "type": "normal",
+      "action_examples": [
+        "Updated the public docstrings for both search CV classes to document the new timing attribute and ensured formatting consistency."
+      ],
+      "intent_examples": [
+        "Make the new attribute discoverable and clearly specified in the public API documentation."
+      ],
+      "error_examples": [
+        "Initial docstring insertion missed a blank line; formatting was corrected immediately afterward."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "action_examples": [
+        "Ran the module’s test suite, diagnosed an unrelated pytest API incompatibility failure, and re-ran a focused subset (refit-related and excluding the known-bad test) to ensure no regressions from the change.",
+        "Ran model_selection search tests; diagnosed an unrelated pytest compatibility failure; reran targeted and filtered subsets to validate the change doesn’t break refit-related functionality.",
+        "Executed the module test suite, diagnosed an unrelated pytest-API compatibility failure, then reran refit-focused and filtered tests to validate the change does not introduce regressions.",
+        "Ran upstream test suite portions; diagnosed an unrelated pytest compatibility failure, then executed focused refit-related tests to confirm changes didn’t break relevant behavior."
+      ],
+      "intent_examples": [
+        "Ensure the code change doesn’t break existing behavior while accounting for a pre-existing test environment issue.",
+        "Confirm the change is compatible with the existing test suite and isolate unrelated infrastructure failures.",
+        "Ensure existing functionality remains intact while accounting for pre-existing test incompatibilities.",
+        "Ensure correctness against existing tests while isolating unrelated infrastructure failures."
+      ],
+      "error_examples": [
+        "Full test file run hit a pre-existing pytest.raises(message=...) incompatibility; mitigated by selecting relevant tests / excluding the known failing case.",
+        "Full file test run failed due to an unexpected keyword argument in pytest.raises (unrelated to the change).",
+        "Initial test run failed due to pytest.raises API mismatch (unrelated to refit_time_ change).",
+        "Encountered pre-existing pytest.raises(message=...) incompatibility causing an unrelated test failure; proceeded with targeted tests."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "action_examples": [
+        "Updated public docstrings for GridSearchCV and RandomizedSearchCV to document the new refit_time_ attribute, correcting formatting after an initial misplaced edit attempt.",
+        "Updated the public API documentation by adding `refit_time_` to the documented attributes for both grid and randomized search estimators, correcting formatting issues introduced during editing.",
+        "Updated public documentation by adding refit_time_ to the Attributes sections for both GridSearchCV and RandomizedSearchCV."
+      ],
+      "intent_examples": [
+        "Make the new attribute discoverable and properly described for users.",
+        "Make the new attribute discoverable and consistent with other documented refit-dependent attributes.",
+        "Make the new API discoverable and clarify when the attribute is available."
+      ],
+      "error_examples": [
+        "Accidentally inserted a blank line at an unintended location, then removed it and applied the intended formatting fix.",
+        "A mistaken edit inserted a blank line at the wrong location; it was immediately undone and corrected."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "action_examples": [
+        "Updated public documentation blocks in the search estimator docstrings to include the new refit_time_ attribute for both grid and randomized search, then revalidated formatting and reran filtered tests and an end-to-end reproduction script."
+      ],
+      "intent_examples": [
+        "Make the new attribute discoverable and ensure documentation and behavior remain consistent after edits."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "action_examples": [
+        "Created and executed a small validation script covering refit enabled/disabled and multi-metric refit-as-string scenarios, then ran relevant pytest subsets and reviewed diffs.",
+        "Revalidated with an expanded script (multi-metric refit via scorer name, multi-metric refit=False, unsupervised fit without y) and ran a broader test selection excluding the known-broken case."
+      ],
+      "intent_examples": [
+        "Confirm the attribute exists only when refit occurs, behaves as expected across variants, and does not break existing behavior.",
+        "Confirm robustness across common configuration variants and provide higher confidence in compatibility."
+      ],
+      "error_examples": [
+        "A full test run hit an unrelated pytest API incompatibility; proceeded with targeted/filtered tests to validate the change."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "action_examples": [
+        "Searched the codebase for BaseSearchCV and inspected the implementation of the search module to locate where refitting occurs within the fit workflow.",
+        "Searched the codebase for the BaseSearchCV implementation and inspected the fit method to pinpoint where the best estimator is refit.",
+        "Searched the codebase for BaseSearchCV and inspected the implementation of its fit method to locate the refit block and related documented attributes.",
+        "Located the implementation of the search CV base class and inspected the `fit` method to identify where refitting the best estimator occurs.",
+        "Searched the repository for the BaseSearchCV implementation and inspected the main search module to locate the fit() method and the refit block."
+      ],
+      "intent_examples": [
+        "Identify the exact code path to instrument for measuring refit duration.",
+        "Identify the exact location to instrument refitting time and understand existing control flow around refit and scoring modes.",
+        "Identify the exact refit execution point and the appropriate places to add a new timing attribute and its documentation.",
+        "Find the exact code region to instrument for measuring refit duration.",
+        "Identify the exact code location where the best estimator is refit so timing can be added correctly."
+      ],
+      "error_examples": [
+        "Initial find/grep pipeline returned non-zero (123) but still produced the needed file locations.",
+        "Initial find/grep pipeline returned a non-zero status due to xargs/grep behavior, but still revealed the target files."
+      ]
+    }
+  ]
+}

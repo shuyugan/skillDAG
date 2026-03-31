@@ -1,0 +1,213 @@
+{
+  "instance_id": "sympy__sympy-23413",
+  "skill_name": "Fix Truncation in Matrix Normal Form",
+  "description": "Diagnose and repair bugs in canonical matrix form algorithms (e.g., Hermite/Smith/row-echelon variants) where the returned result has the wrong shape due to incorrect rank/pivot detection. Apply when rectangular (especially tall) matrices unexpectedly lose rows/columns or are misclassified as rank-deficient.",
+  "trigger_conditions": [
+    "A matrix normal-form routine returns a result with fewer rows/columns than mathematically expected",
+    "Failures occur primarily for rectangular inputs (e.g., more rows than columns) or when some bottom rows are zero",
+    "The algorithm uses a pivot-scan loop plus a final slice/truncation step based on computed pivots/rank",
+    "Transformations like transpose/row-vs-column conversion expose an output-shape discrepancy"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The code locations that implement the normal-form computation and its public entry points have been identified, along with existing tests that assert output shape/content.",
+      "type": "intermediate",
+      "verification": [
+        "The primary public API entry point(s) for the normal-form computation have been identified",
+        "The core internal routine that performs the pivot/rank computation has been identified",
+        "At least one existing test location that covers the normal-form output (including shape expectations) has been identified"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The reported output-shape truncation has been reproduced with a minimal example that does not rely on optional external dependencies, and variants show the same failure mode.",
+      "type": "intermediate",
+      "verification": [
+        "A minimal reproduction using only the project’s built-in matrix types reproduces the incorrect truncated output",
+        "At least one additional small rectangular variant reproduces the same class of shape/rank error"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The algorithm’s pivot discovery loop and the step that truncates/slices the final output based on pivot/rank bookkeeping have been understood and localized in the implementation.",
+      "type": "intermediate",
+      "verification": [
+        "The pivot-selection/iteration scheme has been characterized well enough to explain how pivots/rank are decided",
+        "The exact point where the output is truncated (e.g., slicing by computed pivot/rank metadata) has been identified"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "The root cause has been identified: the pivot scan does not consider enough candidate rows for rectangular inputs, causing valid pivots to be missed and the output to be truncated as if the matrix had lower rank.",
+      "type": "intermediate",
+      "verification": [
+        "The specific control-flow limitation that prevents scanning all necessary rows has been pinpointed",
+        "Using the reproducer, it has been shown how skipped candidate rows lead to missed pivots and downstream truncation"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "A corrected iteration strategy has been designed and sanity-checked, ensuring all necessary rows are scanned while preserving safe termination when no pivot positions remain.",
+      "type": "intermediate",
+      "verification": [
+        "The proposed strategy scans all rows needed to discover pivots for rectangular inputs and does not rely on an incorrect row bound",
+        "A safe early-stop/guard condition has been identified to prevent pivot-index underflow or invalid indexing once pivot positions are exhausted"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "The production implementation has been updated to use the corrected scanning and termination logic, and it still returns valid normal-form outputs for square and rectangular matrices.",
+      "type": "intermediate",
+      "verification": [
+        "The core normal-form routine reflects the revised scan bound and includes a guard/early-stop when pivot positions are exhausted",
+        "The routine produces an output of the correct type and expected shape for both square and rectangular inputs"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "Regression tests have been added or updated to assert the corrected output shape/content, and any tests that previously encoded the buggy truncation behavior have been corrected.",
+      "type": "intermediate",
+      "verification": [
+        "A new or modified test covers the original failing scenario (or an equivalent minimal reproducer) and asserts the corrected output",
+        "Any tests that previously passed only because they expected the buggy truncation have been updated to the mathematically correct expectation"
+      ]
+    },
+    {
+      "node_id": "S8",
+      "state": "End-to-end validation has confirmed the original problematic workflow now produces the expected result shape/content, and relevant test coverage passes.",
+      "type": "terminal",
+      "verification": [
+        "Re-running the original user-visible computation (or an equivalent dependency-free reproduction) yields the expected entries and shape",
+        "Targeted tests in the affected areas run successfully without failures attributable to the change"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "After locating the responsible implementation and tests, a minimal failing example is needed to reliably reproduce the truncation and to make debugging independent of optional third-party libraries.",
+      "actions": "Construct a smallest-possible input using only built-in matrix representations, run the normal-form routine through the same transformation pipeline that triggers the bug, and create a couple of nearby variants (especially rectangular cases) to confirm the failure pattern.",
+      "errors": [
+        "Reproduction failed because an optional external numeric library was not available; the reproducer was rewritten to use only the project’s built-in matrix types.",
+        "An initial attempt misused the internal matrix representation/indexing API; the reproducer was corrected to use supported access patterns."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Understanding where the algorithm decides pivots/rank and where it slices the result is necessary to connect the observed shape loss to a specific internal decision point.",
+      "actions": "Read the core routine implementing the normal form, map out the pivot-selection loop(s), and identify any final slicing/truncation that depends on computed pivot/rank metadata.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "With a concrete reproducer, tracing control flow against the failing input can reveal which pivots are missed and why the computed rank/shape metadata becomes incorrect.",
+      "actions": "Instrument or step through the pivot loop using the minimal failing case, compare expected vs discovered pivots, and identify the exact control-flow condition that prevents scanning the row(s) containing a valid pivot for rectangular matrices.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "A reproducer can also be used to explore fix directions early, even before the root cause is fully formalized, by testing alternative scan bounds and termination conditions.",
+      "actions": "Experiment with scanning more candidate rows (e.g., all rows) and observe the pivot discovery behavior; simultaneously evaluate what guard/early-stop is required to avoid invalid indexing when available pivot columns/positions are exhausted.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "After inspecting the algorithm, confirming the behavior with a minimal script provides concrete evidence and helps validate hypotheses about where the truncation originates.",
+      "actions": "Build a dependency-free script that runs the identified internal/public routine on small rectangular inputs, add tracing around pivot/rank variables if helpful, and verify the observed truncation matches what the code path suggests.",
+      "errors": [
+        "The initial reproduction approach relied on an optional external numeric library that was unavailable; the reproduction was redone using only built-in matrix functionality."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "Once the flawed scan bound is identified, the next step is to design a correction that scans enough rows to find pivots while preventing new failures from over-scanning (e.g., negative pivot indices).",
+      "actions": "Prototype an iteration strategy that considers all necessary rows for rectangular inputs, add an explicit termination condition when no pivot positions remain, and validate the prototype against the minimal reproducer plus additional edge cases (including rank-deficient and full-rank rectangular matrices).",
+      "errors": [
+        "An initial attempted fix based on rearranging/swapping rows did not reliably produce the correct canonical form and did not address the general truncation issue."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After conceptual validation, the fix must be integrated into the production routine carefully to avoid accidental file corruption and to keep the implementation readable and maintainable.",
+      "actions": "Update the core routine to remove the incorrect row-iteration limit, implement full necessary row scanning with a safe early-break when pivot positions are exhausted, and clean up comments/structure while keeping the patch minimal and reviewable.",
+      "errors": [
+        "A formatting-only edit introduced stray/blank lines that needed follow-up cleanup.",
+        "A bulk/in-place edit accidentally removed or corrupted unrelated parts of the source file; the file was restored from version control and the patch was re-applied cleanly.",
+        "An initial manual edit introduced duplicated logic and messy structure; the routine was rewritten cleanly to reflect the intended control flow."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Changing rank/pivot detection can alter mathematically correct outputs for some cases, so tests must be updated to reflect the corrected behavior and to prevent regressions.",
+      "actions": "Run the existing test coverage around the normal-form routine, identify expectation failures caused by the corrected behavior, add/adjust regression tests for the original failing case, and update any prior expectations that encoded the buggy truncation.",
+      "errors": [
+        "A test update initially used an unsupported constructor/signature for a matrix helper; the test was corrected to use supported construction methods."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S6",
+      "to_node": "S8",
+      "type": "normal",
+      "thought": "Sometimes the fix can be validated end-to-end immediately after implementation; if a full-featured test runner is unavailable, alternative execution paths can still provide confidence.",
+      "actions": "Re-run the original reproduction pipeline to confirm the expected shape/content, execute targeted tests using whatever runner is available (project-internal runner or direct invocation of test functions), and adjust any failing expectations that relied on the old buggy result.",
+      "errors": [
+        "The preferred test runner tooling was not available in the environment; tests were executed using the project’s internal runner and/or direct invocation of test functions instead."
+      ]
+    },
+    {
+      "edge_id": 10,
+      "from_node": "S7",
+      "to_node": "S8",
+      "type": "normal",
+      "thought": "After tests are updated, final validation ensures the user-visible behavior is correct and that broader affected areas remain stable.",
+      "actions": "Execute the corrected reproduction again, run a focused subset of relevant test modules (including dependent areas that exercise the normal-form routine), and review the final changeset for completeness and unintended side effects.",
+      "errors": [
+        "The preferred external test runner was unavailable; validation switched to the project’s internal test runner or manual execution."
+      ]
+    },
+    {
+      "edge_id": 11,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before debugging or changing algorithmic code, the responsible implementation and existing tests must be located so investigation and validation are grounded in the correct layer.",
+      "actions": "Search the repository for the public API and core implementation of the normal-form routine, identify which internal representation performs the computation, and locate the associated tests that assert correctness and output shape.",
+      "errors": [
+        "An initial repository search targeted an incorrect/nonexistent path; the search was re-run from the correct project root.",
+        "An initial attempt bundled multiple tool actions into one request and was rejected by the harness; the steps were re-issued as single actions."
+      ]
+    }
+  ]
+}

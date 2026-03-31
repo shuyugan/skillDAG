@@ -1,0 +1,194 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-12973",
+  "skill_name": "Resolve Duplicated Configuration Parameters",
+  "description": "Addresses bugs where the same configuration option is exposed in multiple API layers (e.g., constructor and method arguments) and different internal steps accidentally consult different sources. Apply when a defaulted method parameter silently overrides an instance-level setting or when internal stages show inconsistent behavior due to mixed configuration precedence.",
+  "trigger_conditions": [
+    "A class-level configuration option is duplicated as a method argument with its own default value",
+    "User-provided instance configuration is silently overridden when calling a method without explicitly passing the duplicated argument",
+    "Different internal phases (e.g., validation/preprocessing vs core algorithm) read the configuration from different places",
+    "A fix requires preserving backward compatibility while clarifying precedence rules"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "Root cause of duplicated or contradictory configuration control is identified and localized along the execution path.",
+      "type": "intermediate",
+      "verification": [
+        "The duplicated configuration surface is identified at both the instance level (e.g., constructor/attributes) and the method level (e.g., a method argument) with an explanation of how their defaults can conflict",
+        "Multiple internal consumers of the configuration have been identified, with clarity on which consumer reads which source and how that causes mixed behavior"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "A backward-compatible API change has been implemented so the method does not override the instance configuration unless an explicit override is provided.",
+      "type": "intermediate",
+      "verification": [
+        "The method signature accepts a sentinel default (e.g., None) and resolves the effective value to the instance setting when the sentinel is used",
+        "Public documentation for the method parameter explains the precedence rule and the meaning of the sentinel value"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "A single resolved effective configuration value is used consistently across the entire operation pipeline, including preprocessing and the core implementation.",
+      "type": "intermediate",
+      "verification": [
+        "All internal steps that depend on the configuration receive the same resolved effective value rather than independently consulting different sources",
+        "An explicit method-time override affects every internal stage that depends on that configuration"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "Behavior has been validated with targeted runtime scenarios covering defaulting to instance configuration and explicit method-time override combinations.",
+      "type": "intermediate",
+      "verification": [
+        "A small script or test demonstrates that setting the instance configuration and calling the method without the argument preserves the instance behavior",
+        "A small script or test demonstrates that passing the method argument explicitly overrides the instance behavior across the full pipeline"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Collateral regressions introduced during implementation have been detected and removed, restoring unrelated code paths to their prior behavior.",
+      "type": "intermediate",
+      "verification": [
+        "A runtime error introduced in an unrelated component (e.g., undefined variable due to accidental edits) has been eliminated by reverting or correcting unintended changes",
+        "A diff review confirms only intended files/lines related to the configuration fix remain modified"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "Automated test impact has been assessed, and any remaining failures have been shown to be unrelated to the change.",
+      "type": "intermediate",
+      "verification": [
+        "The relevant automated tests for the modified component/module pass with the patch applied",
+        "Any remaining failing tests have been reproduced on baseline (without the patch) or otherwise demonstrated to be independent of the change"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The final fix is minimal, consistent, and ready for submission, with intended behavior and documentation updates confirmed.",
+      "type": "terminal",
+      "verification": [
+        "The final diff contains only the API signature adjustment, sentinel-resolution logic, consistent internal usage of the resolved value, and documentation updates (with no extraneous edits)",
+        "The behavior contract is satisfied: default behavior follows the instance configuration; the method only overrides when explicitly provided"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the conflicting parameter surfaces are understood, the safest correction is to prevent a method default from silently overriding the instance configuration while still allowing an explicit override for compatibility.",
+      "actions": "Update the method parameter to use a sentinel default (such as None) and add a small resolution step that maps the sentinel to the instance-held value; update the method documentation to state precedence and the sentinel meaning.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "In some cases the root cause analysis directly reveals that inconsistent configuration usage spans internal stages, so resolving both the public API and internal propagation can be addressed together.",
+      "actions": "Implement a single effective configuration value computed near method entry and thread it through all internal calls that depend on it, including any validation/preprocessing and the core algorithm; align the method signature and documentation with the new precedence rule.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After making the API backward-compatible, internal stages may still consult different configuration sources; consolidating all consumers onto the resolved effective value eliminates mixed behavior.",
+      "actions": "Audit the full pipeline for every place the configuration is used; replace mixed reads (instance attribute vs method argument vs local defaults) with the single resolved local value and ensure that explicit overrides propagate to all dependent steps.",
+      "errors": [
+        "Only part of the pipeline was updated to use the resolved effective value, so an explicit method-time override affected the core implementation but not preprocessing (or vice versa).",
+        "The initial change updated one internal consumer but left another consumer reading the original instance setting, causing override scenarios to behave inconsistently."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "With a unified effective configuration, targeted execution checks are needed to confirm both defaulting and explicit override behavior match the documented contract and to catch any lingering stage-specific discrepancies.",
+      "actions": "Create a small runtime script or focused test that exercises combinations of instance configuration and method-time override; verify the observable side effects associated with the option reflect the expected precedence in all scenarios.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "Running broader tests after internal refactors can reveal accidental edits beyond the intended scope; addressing these regressions is necessary before evaluating the true impact of the fix.",
+      "actions": "Run the relevant automated tests; if widespread failures appear, inspect recent changes for unintended modifications (often caused by broad edits) and revert or correct them, then re-run tests to restore baseline stability.",
+      "errors": [
+        "An overly broad edit unintentionally modified another component, leading to a runtime NameError due to referencing an undefined configuration variable.",
+        "Test failures were caused by an unrelated introduced change that referenced a non-existent local variable in a different code path; reverting the unintended change restored baseline behavior."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "Even if targeted behavioral scenarios pass, the test suite may expose unrelated breakages caused by accidental edits; these need to be traced and undone to keep the patch scoped.",
+      "actions": "Investigate new test failures by locating the first failing traceback, identify whether the failing code path is unrelated to the intended fix, and revert or adjust the unintended modifications; confirm the unintended pattern does not recur elsewhere.",
+      "errors": [
+        "A broad replacement modified an unrelated method and caused a NameError during tests; reverting the unintended edit resolved the regression."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After runtime validation, automated tests help confirm no regressions were introduced; any failures must be triaged to determine whether they are caused by the change or pre-existing/flaky.",
+      "actions": "Run the relevant test subset and then broader module tests; if a failure appears, reproduce it in isolation and compare against a baseline run without the patch to determine causality, narrowing focus to tests most directly exercising the modified behavior.",
+      "errors": [
+        "A failing numerical or stability-sensitive test in the broader module appeared unrelated while the component-specific tests passed.",
+        "A failure appeared in a full-file test run but reproduced without the patch or disappeared in isolation, indicating it was unrelated or order-dependent."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Once accidental regressions are removed, remaining failures should be assessed for true causality so the patch is not blamed for baseline or flaky issues.",
+      "actions": "Re-run tests after cleanup; if failures remain, compare patched vs baseline behavior (e.g., temporarily removing local changes) and document evidence that any remaining failures are pre-existing; validate the fixed behavior with the most relevant tests and targeted scenarios.",
+      "errors": []
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After collateral regressions are addressed, the patch can be finalized by ensuring any remaining failures are not attributable to it and that the change set is minimal and coherent.",
+      "actions": "Confirm remaining failures are baseline/unrelated through comparison runs; then perform a final diff review to ensure the patch contains only the intended API/behavior/documentation adjustments and no stray refactors.",
+      "errors": []
+    },
+    {
+      "edge_id": 10,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "With test impact understood, the final step is to ensure the change is submission-ready: minimal diff, consistent internal behavior, and clear documentation of precedence.",
+      "actions": "Review the final diff for scope; verify the method signature and sentinel-resolution logic are correct; ensure all internal consumers use the resolved effective value; confirm documentation states the precedence rule and sentinel semantics.",
+      "errors": []
+    },
+    {
+      "edge_id": 11,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before changing behavior, the duplicated configuration surfaces and their internal consumers must be identified to understand how contradictions occur and where to apply a safe, compatible fix.",
+      "actions": "Inspect the component implementation to find where the configuration is defined at the instance level and duplicated in method arguments; trace how each value flows into internal preprocessing and core execution to pinpoint where inconsistent behavior originates.",
+      "errors": []
+    }
+  ]
+}

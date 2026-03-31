@@ -1,0 +1,267 @@
+{
+  "instance_id": "django__django-16502",
+  "nodes": [
+    {
+      "node_id": "S1",
+      "raw_state": "Development server (runserver) codepath responsible for writing WSGI response bytes is located and scoped to the relevant handler/module.",
+      "type": "intermediate",
+      "raw_verification": [
+        "Can point to the specific Django module/class used by runserver to serve WSGI requests (the handler responsible for finish_response/write/send_headers).",
+        "Can describe where in that codepath response body bytes are emitted to the socket."
+      ],
+      "action_examples": [
+        "Attempted an initial repository scan using an incorrectly formatted multi-action command, then switched to locating the relevant server module by searching for the HTTP server implementation file.",
+        "Attempted initial repository/source exploration but issued an improperly formatted multi-command action; then searched for the server implementation file in the Django source tree.",
+        "Located the development server implementation by searching for and opening the core HTTP server module, then inspected upstream wsgiref handler behavior (finish_response) to understand where bodies are written."
+      ],
+      "intent_examples": [
+        "Find the Django runserver/WSGI server code path where HEAD responses would be handled.",
+        "Identify where runserver/WSGI server logic lives to investigate HEAD response handling.",
+        "Identify the codepath responsible for runserver sending response bodies and understand the baseline WSGI server semantics."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "raw_state": "Correct conceptual hook for HEAD compliance is identified by understanding upstream wsgiref response finalization semantics and Django’s customization points.",
+      "type": "intermediate",
+      "raw_verification": [
+        "Can explain how wsgiref/BaseHandler (or equivalent) finalizes a response (iteration, write(), send_headers, finish_content, close).",
+        "Can justify a specific interception point where HEAD body suppression can be applied without breaking header emission."
+      ],
+      "action_examples": [
+        "Inspected the development server source and reviewed the upstream WSGI reference handler's write implementation via introspection.",
+        "Inspected server handler code and referenced upstream wsgiref BaseHandler.finish_response implementation to understand default response finalization behavior.",
+        "Investigated wsgiref internals (run/close/finish_content/write/send_headers) and adjusted the HEAD flow to better match upstream exception/close patterns (avoiding premature close semantics)."
+      ],
+      "intent_examples": [
+        "Understand where response bodies are written and identify the correct extension point for HEAD body stripping.",
+        "Determine the correct interception point to prevent sending bodies for HEAD while still sending headers.",
+        "Fix crashes caused by incorrect lifecycle management (closing too early / conflicting with wsgiref expectations)."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "raw_state": "Bug is reproducible and confirmed at the protocol level that runserver sends an HTTP response body for HEAD requests (not just a client artifact).",
+      "type": "intermediate",
+      "raw_verification": [
+        "Has a deterministic repro that captures raw bytes from the server and shows body bytes after headers for a HEAD request.",
+        "Demonstrates contrast with expected behavior (e.g., GET includes body; HEAD must not) using the same server path."
+      ],
+      "action_examples": [
+        "Built an initial reproduction script using Django's ServerHandler directly; encountered missing runtime context (request handler) and logging/IO type issues; replaced approach with a minimal real WSGI HTTP server harness using Django's WSGIServer and Python's http.client.",
+        "Recognized that http.client masks HEAD bodies; created a raw-socket test to capture bytes on the wire and confirmed the server sent the response body for HEAD.",
+        "Created an initial standalone reproduction script using ServerHandler, encountered missing required request handler attributes, then rewrote the script with a mock request handler/server and confirmed HEAD returns a body while GET behaves correctly."
+      ],
+      "intent_examples": [
+        "Reproduce the HEAD-body issue in a controlled environment before implementing a fix.",
+        "Validate the actual protocol-level behavior and confirm the reported RFC non-compliance.",
+        "Reproduce the bug deterministically and establish a failing baseline before changing framework code."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "raw_state": "Fix implemented in the development server’s WSGI handler to prevent emitting body bytes for HEAD requests while preserving normal behavior for other methods.",
+      "type": "intermediate",
+      "raw_verification": [
+        "Code changes ensure no body is written on HEAD (both iterator yields and start_response write() path) while leaving GET/others unchanged.",
+        "Implementation preserves correct handler lifecycle (close/finish/exception flow) consistent with wsgiref expectations."
+      ],
+      "action_examples": [
+        "Implemented a fix by modifying the server handler to suppress writing body data for HEAD requests while still forcing headers to be sent, then verified the change in the code.",
+        "Edited the built-in server handler to override response finalization for HEAD requests so that headers are sent and the response is finalized without iterating/writing body data; verified the patch placement and contents.",
+        "Implemented an initial override of the server handler’s response finalization to treat HEAD requests specially by skipping body writing and attempting to just finalize headers/close.",
+        "Created and ran a targeted test script simulating WSGI requests (GET/HEAD, chunked, generator, error responses) to validate that HEAD bodies are suppressed and other methods remain unaffected."
+      ],
+      "intent_examples": [
+        "Make the dev server RFC-compliant by ensuring HEAD responses never include a body, without breaking headers such as Content-Length.",
+        "Restore RFC-compliant behavior for runserver by preventing response bodies on HEAD responses while preserving normal behavior for other methods.",
+        "Restore RFC-compliant behavior for HEAD on the development server by preventing response bodies from being sent.",
+        "Reproduce the reported defect and confirm the change works across typical WSGI response patterns."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "raw_state": "Edge cases for HEAD are correctly handled (e.g., generator/streaming iterables, delayed start_response, error paths) without crashes or broken lifecycle behavior.",
+      "type": "intermediate",
+      "raw_verification": [
+        "A HEAD request against a generator/iterable WSGI app results in headers being sent and no body bytes, with the iterable properly closed/consumed as needed.",
+        "No handler exceptions are raised due to premature close or incorrect finish_content/send_headers sequencing."
+      ],
+      "action_examples": [
+        "Debugged the generator scenario by stepping through handler execution to confirm start_response is only invoked upon iteration; updated HEAD handling to consume the response iterator without writing output, then finalize headers and close cleanly."
+      ],
+      "intent_examples": [
+        "Ensure headers are set and sent for generator-based WSGI apps while still suppressing the HEAD body."
+      ]
+    },
+    {
+      "node_id": "S7",
+      "raw_state": "Fix is validated by targeted tests and relevant Django suites, demonstrating RFC-compliant HEAD behavior and no regressions.",
+      "type": "terminal",
+      "raw_verification": [
+        "Automated or scripted verification shows raw-wire HEAD responses contain no body bytes and headers remain correct across scenarios.",
+        "Relevant Django test suites (or affected component tests) pass with the change applied."
+      ],
+      "action_examples": [
+        "Validated behavior with raw-socket and client-level tests for HEAD and GET; added additional edge-case coverage including other methods and WSGI apps using the start_response write callable; ran Django test suites for related components; removed temporary test files and reviewed the diff.",
+        "Issued the final submission command after summarizing the root cause and fix.",
+        "Validated the fix using the reproduction script and a broader custom test script covering generator responses, status variations, and header preservation; then ran relevant Django test suites and reviewed the final diff; removed temporary test files and submitted.",
+        "Validated the fix via custom unit-style script tests, an integration-style test using the actual development WSGI server, and ran relevant Django test suites; reviewed the final diff and submitted."
+      ],
+      "intent_examples": [
+        "Ensure the fix works in realistic scenarios and does not regress other request methods or WSGI behaviors.",
+        "Complete the task and submit the solution.",
+        "Confirm correctness across edge cases and ensure no regressions in existing Django tests before finalizing changes.",
+        "Confirm correctness and guard against regressions before finalizing the change."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "raw_state": "Start",
+      "type": "start",
+      "raw_verification": [],
+      "action_examples": [],
+      "intent_examples": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "action_examples": [
+        "Inspected the development server source and reviewed the upstream WSGI reference handler's write implementation via introspection.",
+        "Inspected server handler code and referenced upstream wsgiref BaseHandler.finish_response implementation to understand default response finalization behavior."
+      ],
+      "intent_examples": [
+        "Understand where response bodies are written and identify the correct extension point for HEAD body stripping.",
+        "Determine the correct interception point to prevent sending bodies for HEAD while still sending headers."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S5",
+      "type": "normal",
+      "action_examples": [
+        "Implemented an initial override of the server handler’s response finalization to treat HEAD requests specially by skipping body writing and attempting to just finalize headers/close."
+      ],
+      "intent_examples": [
+        "Restore RFC-compliant behavior for HEAD on the development server by preventing response bodies from being sent."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "action_examples": [
+        "Built an initial reproduction script using Django's ServerHandler directly; encountered missing runtime context (request handler) and logging/IO type issues; replaced approach with a minimal real WSGI HTTP server harness using Django's WSGIServer and Python's http.client.",
+        "Created an initial standalone reproduction script using ServerHandler, encountered missing required request handler attributes, then rewrote the script with a mock request handler/server and confirmed HEAD returns a body while GET behaves correctly."
+      ],
+      "intent_examples": [
+        "Reproduce the HEAD-body issue in a controlled environment before implementing a fix.",
+        "Reproduce the bug deterministically and establish a failing baseline before changing framework code."
+      ],
+      "error_examples": [
+        "Direct ServerHandler invocation lacked required request context (no request_handler), causing AttributeError and follow-on bytes/str error handling issues.",
+        "Initial test assumed ServerHandler could run without a request_handler; crashed with AttributeError and was corrected by mocking required attributes."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S6",
+      "type": "normal",
+      "action_examples": [
+        "Debugged the generator scenario by stepping through handler execution to confirm start_response is only invoked upon iteration; updated HEAD handling to consume the response iterator without writing output, then finalize headers and close cleanly."
+      ],
+      "intent_examples": [
+        "Ensure headers are set and sent for generator-based WSGI apps while still suppressing the HEAD body."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "action_examples": [
+        "Implemented a fix by modifying the server handler to suppress writing body data for HEAD requests while still forcing headers to be sent, then verified the change in the code.",
+        "Edited the built-in server handler to override response finalization for HEAD requests so that headers are sent and the response is finalized without iterating/writing body data; verified the patch placement and contents."
+      ],
+      "intent_examples": [
+        "Make the dev server RFC-compliant by ensuring HEAD responses never include a body, without breaking headers such as Content-Length.",
+        "Restore RFC-compliant behavior for runserver by preventing response bodies on HEAD responses while preserving normal behavior for other methods."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S2",
+      "type": "normal",
+      "action_examples": [
+        "Investigated wsgiref internals (run/close/finish_content/write/send_headers) and adjusted the HEAD flow to better match upstream exception/close patterns (avoiding premature close semantics)."
+      ],
+      "intent_examples": [
+        "Fix crashes caused by incorrect lifecycle management (closing too early / conflicting with wsgiref expectations)."
+      ],
+      "error_examples": [
+        "Assumed headers would be available without iterating the response; generator apps hadn’t called start_response, causing None headers/status and crashes."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "action_examples": [
+        "Validated behavior with raw-socket and client-level tests for HEAD and GET; added additional edge-case coverage including other methods and WSGI apps using the start_response write callable; ran Django test suites for related components; removed temporary test files and reviewed the diff.",
+        "Validated the fix using the reproduction script and a broader custom test script covering generator responses, status variations, and header preservation; then ran relevant Django test suites and reviewed the final diff; removed temporary test files and submitted."
+      ],
+      "intent_examples": [
+        "Ensure the fix works in realistic scenarios and does not regress other request methods or WSGI behaviors.",
+        "Confirm correctness across edge cases and ensure no regressions in existing Django tests before finalizing changes."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "action_examples": [
+        "Validated the fix via custom unit-style script tests, an integration-style test using the actual development WSGI server, and ran relevant Django test suites; reviewed the final diff and submitted."
+      ],
+      "intent_examples": [
+        "Confirm correctness and guard against regressions before finalizing the change."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 9,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "action_examples": [
+        "Attempted an initial repository scan using an incorrectly formatted multi-action command, then switched to locating the relevant server module by searching for the HTTP server implementation file.",
+        "Attempted initial repository/source exploration but issued an improperly formatted multi-command action; then searched for the server implementation file in the Django source tree.",
+        "Located the development server implementation by searching for and opening the core HTTP server module, then inspected upstream wsgiref handler behavior (finish_response) to understand where bodies are written."
+      ],
+      "intent_examples": [
+        "Find the Django runserver/WSGI server code path where HEAD responses would be handled.",
+        "Identify where runserver/WSGI server logic lives to investigate HEAD response handling.",
+        "Identify the codepath responsible for runserver sending response bodies and understand the baseline WSGI server semantics."
+      ],
+      "error_examples": [
+        "Initial command was rejected for including many actions instead of exactly one.",
+        "Initial step failed due to multiple actions in one command; corrected by issuing a single find command.",
+        "Initial command was rejected for including multiple actions instead of one."
+      ]
+    }
+  ]
+}

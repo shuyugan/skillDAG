@@ -1,0 +1,7 @@
+{
+  "common_errors": [
+    "Follow the tool/interaction protocol precisely: issue exactly one command/action per step and format it exactly as required (avoid compound commands).",
+    "Do not signal completion until you have actually made the necessary changes and can point to concrete evidence (edits applied, reproduction steps run, and validation/tests executed).",
+    "Avoid asserting that a fix exists or was implemented without verifiable support; document what you changed and the observations/results that confirm it works."
+  ]
+}

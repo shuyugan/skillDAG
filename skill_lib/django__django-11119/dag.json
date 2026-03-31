@@ -1,0 +1,146 @@
+{
+  "instance_id": "django__django-11119",
+  "skill_name": "Propagate Engine Defaults into Render Context",
+  "description": "Use this workflow when a high-level rendering/helper API should honor configuration stored on an owning object (engine/client/service), but a sub-object (context/options/request) is created with defaults that override that configuration. It guides you from locating the wrapper code path, confirming the missing propagation, implementing a minimal fix that preserves caller overrides, and validating via targeted and automated tests.",
+  "trigger_conditions": [
+    "A configurable component exposes an option (e.g., escaping, encoding, strictness) but a convenience method ignores it and behaves as if the default is always enabled",
+    "The problematic behavior happens only when inputs are passed in a “raw” form (e.g., plain map/dict) but not when callers pass a fully constructed object",
+    "Inspection suggests an internal wrapper constructs a context/options object without passing through the owning component’s configuration",
+    "A bug report indicates a regression after refactoring that introduced new helper/wrapper code"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The responsible implementation site for the rendering-to-string helper and the internal logic that wraps raw inputs into a rendering context has been located.",
+      "type": "intermediate",
+      "verification": [
+        "The exact module/class/method implementing the rendering-to-string helper can be identified",
+        "The specific code path where a raw mapping/object is converted into an internal context/options object can be pointed to"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The root cause has been confirmed: the helper constructs a new context/options object without propagating the owning component’s configuration, causing defaults to override the intended setting.",
+      "type": "intermediate",
+      "verification": [
+        "It can be shown that the context/options constructor applies a default value when the relevant flag/setting is not explicitly provided",
+        "It can be traced that the owning component’s configuration is not passed during wrapping of raw inputs, while pre-constructed context/options inputs bypass this path"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "A fix has been implemented that passes the owning component’s configuration into newly constructed context/options objects, while preserving pass-through behavior when callers provide a pre-built context/options object.",
+      "type": "intermediate",
+      "verification": [
+        "The helper now supplies the owning component’s configuration value when instantiating a new context/options object from raw inputs",
+        "When a context/options instance is provided by the caller, it is still used as-is (no double-wrapping and no overriding of caller-provided settings)"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "The fix has been validated with a minimal reproduction that demonstrates correct behavior for both configuration states and for both raw-input and pre-built context/options inputs.",
+      "type": "intermediate",
+      "verification": [
+        "A minimal scenario demonstrates that disabling the relevant feature on the owning component produces the expected unmodified output when rendering from raw inputs",
+        "A complementary scenario demonstrates that enabling the feature (or using defaults) still produces the expected modified/sanitized output, and that explicitly passing a pre-built context/options object behaves as intended"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Relevant automated regression tests covering the affected rendering behavior have been executed successfully using the project’s standard test invocation conventions.",
+      "type": "intermediate",
+      "verification": [
+        "A targeted existing test suite/module that exercises the rendering helper passes after the change",
+        "Tests are run in a way that matches repository conventions (correct working directory/configuration), avoiding failures caused by mis-invocation"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "The change has been finalized for submission: temporary artifacts have been removed, and any remaining failures in broader suites have been triaged and documented as unrelated to the change.",
+      "type": "terminal",
+      "verification": [
+        "Temporary scripts/files used for manual verification are removed or excluded, and the working tree contains only intended modifications",
+        "If broader test suites fail, there is clear evidence or reasoning that the failures are unrelated to the configuration-propagation change (e.g., pre-existing/environmental issues), and targeted tests relevant to the change remain passing"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the wrapper/helper implementation is found, the next step is to confirm whether the configuration is lost during construction of an internal context/options object and whether constructor defaults explain the observed behavior.",
+      "actions": "Review the helper’s control flow for raw-input handling; inspect the context/options constructor signature and default values; trace how the owning component stores the configuration and whether that value is passed into the constructor in the raw-input path.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After confirming the missing propagation, implement the smallest safe change: propagate the owning configuration only when creating a new internal object, while preserving behavior for callers who pass an already-configured object.",
+      "actions": "Update the raw-input wrapping branch to pass the owning component’s configuration into the context/options constructor; leave the pass-through branch unchanged; ensure the change does not override explicitly provided settings on caller-supplied objects.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "A code change that affects default behavior should be validated with a minimal, focused reproduction to confirm both the fixed case and that existing behavior remains intact for other input forms.",
+      "actions": "Create a minimal rendering scenario that exercises the helper with the configuration toggled both ways; verify output differences match expectations; also test providing a pre-built context/options object to confirm it is not altered by the helper.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After manual validation, run the project’s automated tests for the affected area to prevent regressions, ensuring the test runner is invoked using correct repository conventions.",
+      "actions": "Identify and run the most relevant existing test module/suite for the rendering helper; ensure the working directory and any required configuration for test discovery/imports match project norms; rerun after correcting invocation if necessary.",
+      "errors": [
+        "Test invocation failed because it was run from an incorrect working directory or with an incorrect module path, leading to import/discovery errors."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "If full automation is noisy or environment-dependent, it may be more reliable to finalize after targeted tests and triage broader failures as unrelated, while still ensuring the change is clean and ready to submit.",
+      "actions": "Attempt to run relevant tests; if failures arise from mis-invocation, correct the test path/configuration; if broader suites show unrelated failures, narrow to the targeted suite that covers the change; remove temporary verification artifacts and ensure only intended changes remain.",
+      "errors": [
+        "Test runs failed due to incorrect test module naming, path, or configuration selection; after correcting invocation, targeted tests passed but broader suites still contained unrelated failures."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Even after targeted tests pass, a brief wider sanity check can reveal unexpected side effects; if wider failures appear, confirm whether they are pre-existing/unrelated before finalizing.",
+      "actions": "Optionally run a broader related test subset; if failures occur, re-run the targeted passing tests to confirm the fix is stable; assess whether failures are environmental or pre-existing and document that conclusion; clean up any remaining temporary files.",
+      "errors": [
+        "A broader related test suite reported failures that were not caused by the change (e.g., environment-dependent expectations such as permissions or localization)."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "To fix configuration-propagation bugs, you first need to find the precise helper entry point and the internal wrapping logic where raw inputs are converted into structured objects.",
+      "actions": "Search the codebase for the helper method name and related call sites; narrow results to the owning component’s implementation; identify where raw inputs are accepted and transformed into an internal context/options object for rendering/processing.",
+      "errors": [
+        "An initial broad code search command failed or returned a non-success status, requiring a more targeted search to locate the correct implementation."
+      ]
+    }
+  ]
+}

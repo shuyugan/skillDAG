@@ -1,0 +1,198 @@
+{
+  "instance_id": "django__django-11276",
+  "skill_name": "Swap Custom Escaper for Stdlib",
+  "description": "Applies when a project maintains a custom HTML/text escaping implementation that duplicates functionality available in a standard library or well-maintained dependency. This workflow replaces the custom implementation with the shared one, preserves compatibility where needed (including reverse/round-trip paths), and stabilizes tests that assert string-level output or compare HTML across renderers.",
+  "trigger_conditions": [
+    "A core utility function duplicates escaping/sanitization behavior available in a standard library or widely used dependency",
+    "A performance/maintenance improvement is desired by delegating to a shared implementation",
+    "Downstream code or tests are coupled to exact escaped string spellings (e.g., numeric entity forms) and may break after the swap",
+    "There are reverse-transform or round-trip code paths (e.g., unescape/URL-unescape/normalizers) that must remain compatible with legacy output"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The current escaping behavior, its exact output conventions, and the scope of downstream dependencies (call sites and tests) have been identified.",
+      "type": "intermediate",
+      "verification": [
+        "The responsible module/function for escaping has been located and its current escaping rules (including any notable output spelling choices for special characters) can be described",
+        "At least one downstream usage or test assertion coupled to the previous literal escaped output has been identified"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The project’s escape helper has been rewritten to delegate to the standard library (or shared dependency) implementation, and redundant custom mapping logic is no longer used.",
+      "type": "intermediate",
+      "verification": [
+        "The escape entry point delegates to the standard implementation with equivalent configuration intent (e.g., whether quotes are escaped), and the prior custom translation/mapping is removed or unused",
+        "A simple direct check (import and call) demonstrates the updated output, including any known canonicalization differences (such as different numeric entity forms)"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "A repeatable test execution approach is working in the current environment, and failures caused by the changed escaping output are reproducible.",
+      "type": "intermediate",
+      "verification": [
+        "The project’s supported test runner can be executed successfully in the environment for relevant suites",
+        "At least one failing test attributable to the changed escaped output representation has been reproduced"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "Strict, string-equality test expectations that depended on the previous escaped output spelling have been updated to match the new canonical output.",
+      "type": "intermediate",
+      "verification": [
+        "Previously failing strict-output assertions on escaped content have been updated to match the new canonical escaped representation where applicable",
+        "Re-running the previously failing strict-output tests shows they pass without reverting the new escaping behavior"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Reverse transformations and round-trip behavior have been kept compatible with both legacy and new escaped representations.",
+      "type": "intermediate",
+      "verification": [
+        "Reverse/unescape logic recognizes both legacy and new representations for affected characters (e.g., different numeric character reference spellings)",
+        "Round-trip behavior checks (escape then unescape, plus unescape of legacy strings) produce the expected original characters"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "HTML-aware comparisons and normalization helpers have been made robust to functionally equivalent output differences across renderers and entity representations.",
+      "type": "intermediate",
+      "verification": [
+        "At least one HTML-aware comparison/normalization path treats functionally equivalent numeric character references (e.g., hex vs decimal) as equivalent",
+        "Previously failing cross-renderer or HTML-comparison-based tests pass without reverting the delegated escaping behavior"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The change set has been validated by test results, and any remaining failures have been confirmed unrelated to the patch (pre-existing, environmental, or flaky).",
+      "type": "terminal",
+      "verification": [
+        "Impacted/targeted test suites covering escaping behavior pass (or the full required suite passes, depending on task scope)",
+        "Any remaining failures are shown to reproduce without the patch or are clearly attributable to environment/flakiness rather than the change"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the current behavior and coupling points are known, the duplicated implementation can be safely replaced with the standard/shared version while anticipating observable output differences.",
+      "actions": "Introduce the standard/shared escaping function as the new implementation behind the existing API; remove or bypass custom translation tables/mappings; keep imports and surrounding utilities consistent; perform a quick direct call to confirm expected output changes.",
+      "errors": [
+        "A required unrelated standard-library import was accidentally removed while editing imports and had to be restored."
+      ]
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After changing a core utility, tests are needed to surface all behavioral and expectation mismatches; this requires a reliable way to run the project’s intended test harness in the current environment.",
+      "actions": "Run the project’s supported test runner (not an assumed third-party runner); adjust invocation to match the project’s expected configuration; reproduce failures specifically tied to the changed escaped output representation to guide follow-up fixes.",
+      "errors": [
+        "An assumed test runner was not installed and an incorrect configuration/module selection caused test invocation to fail; switching to the project’s supported test harness resolved it.",
+        "Tests were initially run with an unavailable runner and an invalid configuration target; using the project’s official test runner fixed the issue.",
+        "Initial test runs failed due to using the wrong runner and misconfigured settings; running via the project-provided harness corrected execution.",
+        "Test execution initially failed because a third-party runner was unavailable and the configuration module was incorrect; the project’s built-in runner worked."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "If failures are due to strict string comparisons of escaped output, expectations must be updated to reflect the new canonical representation emitted by the delegated escaper.",
+      "actions": "Iterate through failing tests and update only the expected escaped literals that are representation-dependent; prefer targeted edits over sweeping changes when possible; re-run the relevant suites until strict-output failures are cleared.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Some failures may come from HTML-equivalence assertions where different renderers or components produce functionally equivalent but textually different entities; these require comparison/normalization fixes rather than expectation rewrites everywhere.",
+      "actions": "Identify failures rooted in renderer-to-renderer escaping differences; update HTML comparison helpers or normalization steps so equivalent entities compare equal; re-run the failing tests to confirm stability.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "Updating forward escaping alone can break code paths that reverse escaping or rely on round-trip behavior; compatibility must cover both historical and new encodings.",
+      "actions": "Audit unescape/decode/URL-unescape and any reverse transformations; extend them to recognize both the legacy and new representations for affected characters; add or confirm round-trip checks and adjust tests accordingly.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After updating strict expectations, remaining failures often stem from HTML-aware comparisons or mixed rendering stacks that preserve differing entity spellings; making comparisons canonical avoids widespread brittle test edits.",
+      "actions": "Trace failures to the HTML comparison path; implement canonicalization for numeric character references and other equivalent encodings; carefully apply automated replacements and validate that they did not introduce malformed entities; re-run targeted suites.",
+      "errors": [
+        "An automated bulk-edit command corrupted a test helper file, requiring a clean manual rewrite to restore correctness.",
+        "Over-broad automated replacements introduced malformed entity text (such as missing required punctuation) in expected HTML and required manual correction."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S4",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Once strict expectations are updated, broader validation is needed to ensure no additional regressions exist and to distinguish patch-caused failures from unrelated environmental or flaky issues.",
+      "actions": "Run broader impacted suites; search for remaining legacy representations where relevant; if failures appear, verify whether they reproduce without the patch (by temporarily reverting/stashing changes) to classify them as unrelated; keep the patch focused on escaping-related behavior.",
+      "errors": [
+        "A permissions-related test failure was initially suspected to be caused by the patch but was traced to the execution environment (e.g., running with elevated privileges).",
+        "An intermittent timing/performance-related test failure appeared during large runs and was confirmed to reproduce on baseline, indicating flakiness or pre-existing instability."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Even after ensuring backward-compatible unescaping, renderer-specific output differences can still break HTML comparisons; normalization must account for both legacy/new encodings across renderers.",
+      "actions": "Re-run failing HTML comparison tests that involve alternate renderers or templating backends; extend normalization to handle equivalent entity spellings across sources; validate by re-running both targeted and a wider affected set.",
+      "errors": []
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S6",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "While improving equivalence comparisons, failures can reveal pre-existing malformed expected strings that were previously untested or masked; those expectations must be corrected to valid canonical representations.",
+      "actions": "Inspect failing expected HTML strings for malformed entities or typos; correct the expected fixtures/assertions; re-run the specific failing tests to confirm the fix before continuing broader runs.",
+      "errors": []
+    },
+    {
+      "edge_id": 10,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After normalizing comparisons, final validation ensures the patch is correct end-to-end; any remaining failures must be proven unrelated, and any automated-edit mistakes in reverse transformations must be corrected.",
+      "actions": "Run the appropriate suite scope to confirm green results for all escaping-related coverage; if failures remain, compare against baseline behavior to classify them; review reverse-transformation logic for correctness and repair any automation-induced corruption; do a final sanity check of the escape/unescape behavior.",
+      "errors": [
+        "An automated bulk-edit command corrupted a reverse/unescape replacement chain and required rewriting the affected logic to restore correct behavior."
+      ]
+    },
+    {
+      "edge_id": 11,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before modifying a widely used utility, the exact current behavior and coupling points must be known to avoid accidental regressions and to anticipate which tests or downstream code will need adjustment.",
+      "actions": "Locate the escaping utility and inspect its implementation details and output conventions; search for call sites and tests that assert exact escaped strings; note any characters with multiple valid encodings that could change under a delegated implementation.",
+      "errors": []
+    }
+  ]
+}

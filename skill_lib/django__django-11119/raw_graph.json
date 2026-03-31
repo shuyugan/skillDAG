@@ -1,0 +1,289 @@
+{
+  "instance_id": "django__django-11119",
+  "nodes": [
+    {
+      "node_id": "S1",
+      "raw_state": "Relevant code path for Engine.render_to_string() and its context-construction logic is located",
+      "type": "intermediate",
+      "raw_verification": [
+        "Can point to the exact source file/module and method where Engine.render_to_string() is implemented",
+        "Can identify the specific branch where a plain dict (or non-Context) input is wrapped into a Context for rendering"
+      ],
+      "action_examples": [
+        "Searched the codebase for occurrences of render_to_string and narrowed down to the template engine implementation.",
+        "Searched the Django codebase to locate where render_to_string() is implemented and identified the relevant template engine module.",
+        "Searched the Django codebase for the Engine implementation and located the render_to_string() method in the template engine module.",
+        "Searched the Django source tree to locate where render_to_string() is implemented and narrowed results to the template engine module.",
+        "Searched the Django source tree to locate the implementation of render_to_string() and the template Engine code."
+      ],
+      "intent_examples": [
+        "Find the exact location of Engine.render_to_string() to inspect how context is constructed and rendered.",
+        "Find the exact implementation site to inspect how render_to_string() constructs rendering context.",
+        "Find the exact code path responsible for render_to_string() behavior to assess the reported autoescape issue.",
+        "Find the exact implementation site to inspect and modify the behavior.",
+        "Find the exact code path responsible for rendering templates to strings so it can be inspected and modified."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "raw_state": "Root cause is confirmed: render_to_string() creates a Context without propagating the engine's autoescape configuration",
+      "type": "intermediate",
+      "raw_verification": [
+        "Can show that Context defaults lead to autoescape=True when no explicit value is passed",
+        "Can explain/trace why Engine(autoescape=False) is ignored in render_to_string() for dict inputs (but not necessarily for pre-built Context inputs)"
+      ],
+      "action_examples": [
+        "Inspected the Engine implementation and the Context constructor to confirm how autoescape is defaulted and where it was omitted during Context creation.",
+        "Inspected the Engine implementation and the Context constructor to compare default autoescaping behavior with engine configuration.",
+        "Inspected the Engine and Context implementations to confirm render_to_string() wraps dict contexts with a Context that defaults to autoescape=True.",
+        "Inspected the Engine implementation and the Context constructor to confirm how autoescape is configured and where the default was being applied incorrectly.",
+        "Inspected the Engine implementation and reviewed the Context constructor signature/behavior to confirm how autoescaping is controlled."
+      ],
+      "intent_examples": [
+        "Verify the suspected root cause by checking whether Context supports an autoescape parameter and whether Engine.render_to_string() passes it.",
+        "Confirm the suspected root cause: Context is instantiated with default autoescape=True instead of honoring engine configuration.",
+        "Verify the root cause and determine how Context accepts and applies the autoescape flag.",
+        "Verify the suspected mismatch between Engine autoescape configuration and Context instantiation semantics.",
+        "Verify whether the rendering path incorrectly relies on Context defaults instead of the engine configuration."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "raw_state": "Fix is implemented to propagate Engine.autoescape into Context creation in render_to_string() while preserving Context pass-through behavior",
+      "type": "intermediate",
+      "raw_verification": [
+        "Source change passes engine.autoescape (or equivalent) when constructing a new Context inside render_to_string()",
+        "Existing behavior when a Context instance is supplied remains unchanged (no double-wrapping or overriding caller-provided autoescape)"
+      ],
+      "action_examples": [
+        "Modified Engine.render_to_string() to construct Context with autoescape set from the engine instance, then reviewed the updated code section to confirm the change.",
+        "Modified Engine.render_to_string() to create Context with the engine’s autoescape value when wrapping a plain dict context.",
+        "Modified render_to_string() to construct the Context using the engine’s autoescape configuration when wrapping non-Context inputs, then verified the change in the source.",
+        "Modified Engine.render_to_string() to construct the Context with the engine’s autoescape setting and verified the edit in the source.",
+        "Modified Engine.render_to_string() to create the Context with the engine's configured autoescape value rather than relying on the Context default."
+      ],
+      "intent_examples": [
+        "Ensure Engine.render_to_string() honors the engine-level autoescape configuration rather than always using Context defaults.",
+        "Ensure render_to_string() honors Engine(autoescape=...) consistently with other rendering entry points.",
+        "Ensure render_to_string() honors the Engine-level autoescape setting without changing existing Context-passthrough behavior.",
+        "Ensure render_to_string() honors Engine(autoescape=...) rather than always defaulting to autoescape enabled.",
+        "Ensure render_to_string() honors the engine-level autoescape configuration."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "raw_state": "Fix is functionally validated with a minimal reproduction demonstrating correct escaping behavior for autoescape on/off and Context inputs",
+      "type": "intermediate",
+      "raw_verification": [
+        "A small script or minimal scenario shows Engine(autoescape=False).render_to_string(...) returns unescaped output where appropriate",
+        "A corresponding check shows Engine(autoescape=True) (and/or default) still autoescapes, and passing an explicit Context behaves as expected"
+      ],
+      "action_examples": [
+        "Wrote and executed a minimal standalone verification script covering autoescape=False, autoescape=True, default behavior, and passing an explicit Context object.",
+        "Wrote and executed a minimal verification script covering autoescape=False, autoescape=True, default behavior, and passing a pre-built Context.",
+        "Created and ran a minimal standalone validation script exercising render_to_string() with autoescape on/off and with a pre-built Context instance.",
+        "Created and executed a small standalone validation script that renders templates with autoescape on/off and also checks behavior when a Context is passed directly.",
+        "Verified the source change in-place and created/executed a minimal standalone script exercising autoescape=True/False and direct Context passing behavior."
+      ],
+      "intent_examples": [
+        "Demonstrate the bug is fixed and confirm backwards-compatible behavior when a Context is provided directly.",
+        "Validate the fix directly and ensure backward-compatible behavior when a Context object is provided.",
+        "Confirm the fix changes escaping behavior correctly and preserves legacy behavior when a Context is provided.",
+        "Confirm the behavior change works in practice and does not regress the preserved 'Context passed through' behavior.",
+        "Confirm the fix works functionally and does not regress intended legacy behavior around passing a Context instance."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "raw_state": "Relevant automated regression tests are executed successfully for the affected template engine behavior",
+      "type": "intermediate",
+      "raw_verification": [
+        "A focused existing test module/suite covering the template Engine/rendering runs and passes after the change",
+        "Test invocation is done in a way that clearly reflects project conventions (correct working directory/settings), avoiding false failures"
+      ],
+      "action_examples": [
+        "Attempted to run Django tests from an incorrect working directory, received import errors, then reran the correct template engine test module from the tests directory successfully.",
+        "Attempted to run Django tests from an incorrect location/module path, observed import errors, then reran the correct engine-specific test module from the proper tests directory."
+      ],
+      "intent_examples": [
+        "Validate the change against the project's existing automated tests and ensure no regressions in the relevant suite.",
+        "Validate the change against the project’s test suite and ensure no regressions in relevant coverage."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "raw_state": "Change is finalized for submission with artifacts removed and any unrelated test/environment failures triaged as non-blocking",
+      "type": "terminal",
+      "raw_verification": [
+        "Temporary verification files/scripts are removed or excluded and the working tree is clean aside from intended code changes",
+        "If broader suites fail, there is an explicit determination/evidence they are unrelated to the autoescape propagation change"
+      ],
+      "action_examples": [
+        "Ran a broader template test suite, observed multiple unrelated failures, re-ran the focused engine tests to confirm the change remained green, then removed temporary files.",
+        "Attempted to run template-related Django tests, corrected the test invocation path/settings, and then ran a focused engine test module successfully; cleaned up temporary files.",
+        "Attempted to run the broader template test suite, corrected test discovery/settings invocation, then ran the focused engine test module successfully; noted unrelated pre-existing failures in the full suite and cleaned up temporary files.",
+        "Attempted to run Django’s template test suite, corrected test invocation and settings module usage, then ran targeted engine tests successfully; noted broader suite failures appear unrelated. Cleaned up temporary test artifacts.",
+        "Ran a broader template test subset, observed multiple unrelated failures, revalidated the focused engine tests, and cleaned up temporary test artifacts."
+      ],
+      "intent_examples": [
+        "Sanity-check for unintended side effects while distinguishing pre-existing environment-related failures from the implemented fix.",
+        "Confirm no regressions in the engine’s rendering behavior while avoiding unrelated suite failures; finalize the change.",
+        "Check for regressions in existing tests and ensure the change is safe within the relevant test coverage.",
+        "Verify the change against existing tests and ensure no unintended breakage in core engine tests.",
+        "Sanity-check overall impact while confirming that any broader failures are not caused by the change, then finalize submission state."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "raw_state": "Start",
+      "type": "start",
+      "raw_verification": [],
+      "action_examples": [],
+      "intent_examples": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "action_examples": [
+        "Inspected the Engine implementation and the Context constructor to confirm how autoescape is defaulted and where it was omitted during Context creation.",
+        "Inspected the Engine implementation and the Context constructor to compare default autoescaping behavior with engine configuration.",
+        "Inspected the Engine and Context implementations to confirm render_to_string() wraps dict contexts with a Context that defaults to autoescape=True.",
+        "Inspected the Engine implementation and the Context constructor to confirm how autoescape is configured and where the default was being applied incorrectly.",
+        "Inspected the Engine implementation and reviewed the Context constructor signature/behavior to confirm how autoescaping is controlled."
+      ],
+      "intent_examples": [
+        "Verify the suspected root cause by checking whether Context supports an autoescape parameter and whether Engine.render_to_string() passes it.",
+        "Confirm the suspected root cause: Context is instantiated with default autoescape=True instead of honoring engine configuration.",
+        "Verify the root cause and determine how Context accepts and applies the autoescape flag.",
+        "Verify the suspected mismatch between Engine autoescape configuration and Context instantiation semantics.",
+        "Verify whether the rendering path incorrectly relies on Context defaults instead of the engine configuration."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "action_examples": [
+        "Modified Engine.render_to_string() to construct Context with autoescape set from the engine instance, then reviewed the updated code section to confirm the change.",
+        "Modified Engine.render_to_string() to create Context with the engine’s autoescape value when wrapping a plain dict context.",
+        "Modified render_to_string() to construct the Context using the engine’s autoescape configuration when wrapping non-Context inputs, then verified the change in the source.",
+        "Modified Engine.render_to_string() to construct the Context with the engine’s autoescape setting and verified the edit in the source.",
+        "Modified Engine.render_to_string() to create the Context with the engine's configured autoescape value rather than relying on the Context default."
+      ],
+      "intent_examples": [
+        "Ensure Engine.render_to_string() honors the engine-level autoescape configuration rather than always using Context defaults.",
+        "Ensure render_to_string() honors Engine(autoescape=...) consistently with other rendering entry points.",
+        "Ensure render_to_string() honors the Engine-level autoescape setting without changing existing Context-passthrough behavior.",
+        "Ensure render_to_string() honors Engine(autoescape=...) rather than always defaulting to autoescape enabled.",
+        "Ensure render_to_string() honors the engine-level autoescape configuration."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "action_examples": [
+        "Wrote and executed a minimal standalone verification script covering autoescape=False, autoescape=True, default behavior, and passing an explicit Context object.",
+        "Wrote and executed a minimal verification script covering autoescape=False, autoescape=True, default behavior, and passing a pre-built Context.",
+        "Created and ran a minimal standalone validation script exercising render_to_string() with autoescape on/off and with a pre-built Context instance.",
+        "Created and executed a small standalone validation script that renders templates with autoescape on/off and also checks behavior when a Context is passed directly.",
+        "Verified the source change in-place and created/executed a minimal standalone script exercising autoescape=True/False and direct Context passing behavior."
+      ],
+      "intent_examples": [
+        "Demonstrate the bug is fixed and confirm backwards-compatible behavior when a Context is provided directly.",
+        "Validate the fix directly and ensure backward-compatible behavior when a Context object is provided.",
+        "Confirm the fix changes escaping behavior correctly and preserves legacy behavior when a Context is provided.",
+        "Confirm the behavior change works in practice and does not regress the preserved 'Context passed through' behavior.",
+        "Confirm the fix works functionally and does not regress intended legacy behavior around passing a Context instance."
+      ],
+      "error_examples": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "action_examples": [
+        "Attempted to run Django tests from an incorrect working directory, received import errors, then reran the correct template engine test module from the tests directory successfully.",
+        "Attempted to run Django tests from an incorrect location/module path, observed import errors, then reran the correct engine-specific test module from the proper tests directory."
+      ],
+      "intent_examples": [
+        "Validate the change against the project's existing automated tests and ensure no regressions in the relevant suite.",
+        "Validate the change against the project’s test suite and ensure no regressions in relevant coverage."
+      ],
+      "error_examples": [
+        "Initial test invocation failed due to running from wrong directory/module path, causing import errors.",
+        "Initial test run failed due to importing non-existent modules from the wrong working directory; rerun from tests directory succeeded."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "action_examples": [
+        "Attempted to run template-related Django tests, corrected the test invocation path/settings, and then ran a focused engine test module successfully; cleaned up temporary files.",
+        "Attempted to run the broader template test suite, corrected test discovery/settings invocation, then ran the focused engine test module successfully; noted unrelated pre-existing failures in the full suite and cleaned up temporary files.",
+        "Attempted to run Django’s template test suite, corrected test invocation and settings module usage, then ran targeted engine tests successfully; noted broader suite failures appear unrelated. Cleaned up temporary test artifacts."
+      ],
+      "intent_examples": [
+        "Confirm no regressions in the engine’s rendering behavior while avoiding unrelated suite failures; finalize the change.",
+        "Check for regressions in existing tests and ensure the change is safe within the relevant test coverage.",
+        "Verify the change against existing tests and ensure no unintended breakage in core engine tests."
+      ],
+      "error_examples": [
+        "Initial test run failed due to incorrect module path; full template suite also had many unrelated failures, so validation was narrowed to engine tests.",
+        "Initial test runs failed due to incorrect module name/settings usage; later corrected and targeted tests passed, while full suite had unrelated failures.",
+        "Initial template test runs failed due to incorrect module path/settings module; corrected by running from tests directory with proper settings."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "action_examples": [
+        "Ran a broader template test suite, observed multiple unrelated failures, re-ran the focused engine tests to confirm the change remained green, then removed temporary files.",
+        "Ran a broader template test subset, observed multiple unrelated failures, revalidated the focused engine tests, and cleaned up temporary test artifacts."
+      ],
+      "intent_examples": [
+        "Sanity-check for unintended side effects while distinguishing pre-existing environment-related failures from the implemented fix.",
+        "Sanity-check overall impact while confirming that any broader failures are not caused by the change, then finalize submission state."
+      ],
+      "error_examples": [
+        "Broader template test suite had pre-existing failures unrelated to the change (e.g., permissions/localization expectations)."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "action_examples": [
+        "Searched the codebase for occurrences of render_to_string and narrowed down to the template engine implementation.",
+        "Searched the Django codebase to locate where render_to_string() is implemented and identified the relevant template engine module.",
+        "Searched the Django codebase for the Engine implementation and located the render_to_string() method in the template engine module.",
+        "Searched the Django source tree to locate where render_to_string() is implemented and narrowed results to the template engine module.",
+        "Searched the Django source tree to locate the implementation of render_to_string() and the template Engine code."
+      ],
+      "intent_examples": [
+        "Find the exact location of Engine.render_to_string() to inspect how context is constructed and rendered.",
+        "Find the exact implementation site to inspect how render_to_string() constructs rendering context.",
+        "Find the exact code path responsible for render_to_string() behavior to assess the reported autoescape issue.",
+        "Find the exact implementation site to inspect and modify the behavior.",
+        "Find the exact code path responsible for rendering templates to strings so it can be inspected and modified."
+      ],
+      "error_examples": [
+        "Initial broad search command returned a nonzero status, but subsequent targeted grep located the correct files."
+      ]
+    }
+  ]
+}

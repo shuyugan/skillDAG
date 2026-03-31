@@ -1,0 +1,176 @@
+{
+  "canonical_states": [
+    {
+      "state_id": "S1",
+      "description": "Development server (runserver) codepath responsible for writing WSGI response bytes is located and scoped to the relevant handler/module.",
+      "type": "normal",
+      "verification": [
+        "Can point to the specific Django module/class used by runserver to serve WSGI requests (the handler responsible for finish_response/write/send_headers).",
+        "Can describe where in that codepath response body bytes are emitted to the socket."
+      ]
+    },
+    {
+      "state_id": "S2",
+      "description": "Correct conceptual hook for HEAD compliance is identified by understanding upstream wsgiref response finalization semantics and Django’s customization points.",
+      "type": "normal",
+      "verification": [
+        "Can explain how wsgiref/BaseHandler (or equivalent) finalizes a response (iteration, write(), send_headers, finish_content, close).",
+        "Can justify a specific interception point where HEAD body suppression can be applied without breaking header emission."
+      ]
+    },
+    {
+      "state_id": "S3",
+      "description": "Bug is reproducible and confirmed at the protocol level that runserver sends an HTTP response body for HEAD requests (not just a client artifact).",
+      "type": "normal",
+      "verification": [
+        "Has a deterministic repro that captures raw bytes from the server and shows body bytes after headers for a HEAD request.",
+        "Demonstrates contrast with expected behavior (e.g., GET includes body; HEAD must not) using the same server path."
+      ]
+    },
+    {
+      "state_id": "S5",
+      "description": "Fix implemented in the development server’s WSGI handler to prevent emitting body bytes for HEAD requests while preserving normal behavior for other methods.",
+      "type": "normal",
+      "verification": [
+        "Code changes ensure no body is written on HEAD (both iterator yields and start_response write() path) while leaving GET/others unchanged.",
+        "Implementation preserves correct handler lifecycle (close/finish/exception flow) consistent with wsgiref expectations."
+      ]
+    },
+    {
+      "state_id": "S6",
+      "description": "Edge cases for HEAD are correctly handled (e.g., generator/streaming iterables, delayed start_response, error paths) without crashes or broken lifecycle behavior.",
+      "type": "normal",
+      "verification": [
+        "A HEAD request against a generator/iterable WSGI app results in headers being sent and no body bytes, with the iterable properly closed/consumed as needed.",
+        "No handler exceptions are raised due to premature close or incorrect finish_content/send_headers sequencing."
+      ]
+    },
+    {
+      "state_id": "S7",
+      "description": "Fix is validated by targeted tests and relevant Django suites, demonstrating RFC-compliant HEAD behavior and no regressions.",
+      "type": "terminal",
+      "verification": [
+        "Automated or scripted verification shows raw-wire HEAD responses contain no body bytes and headers remain correct across scenarios.",
+        "Relevant Django test suites (or affected component tests) pass with the change applied."
+      ]
+    }
+  ],
+  "mappings": [
+    {
+      "traj_index": 0,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Located the relevant Django development server implementation file/module to inspect where runserver serves WSGI responses and emits bytes."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Reviewed Django dev server handler and upstream wsgiref handler semantics to identify the correct conceptual interception point for suppressing HEAD bodies without breaking header finalization."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Established a working harness to issue HEAD/GET against actual runserver components, enabling deterministic protocol-level reproduction (setup phase toward confirming the bug on the wire)."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 4,
+      "state_id": "S3",
+      "reason": "Captured raw socket bytes and confirmed the server emits a response body for HEAD requests, verifying the non-compliance at the protocol level."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 5,
+      "state_id": "S5",
+      "reason": "Implemented code changes in the dev server WSGI handler to suppress body writes for HEAD while still ensuring headers are sent."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "Validated the fix with raw-wire checks, additional scenarios including the start_response write() path, and ran relevant Django test suites with no regressions."
+    },
+    {
+      "traj_index": 0,
+      "milestone_id": 7,
+      "state_id": "S7",
+      "reason": "Final submission attempt failed due to external/metadata issue; capability remains at the validated-fix terminal state achieved in the prior milestone."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone establishes where the runserver development server implementation lives in the Django source tree, scoping to the relevant server/handler module responsible for serving WSGI responses."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 2,
+      "state_id": "S2",
+      "reason": "Milestone focuses on understanding wsgiref BaseHandler.finish_response semantics and identifying the correct conceptual interception point to suppress HEAD bodies without breaking header emission."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 3,
+      "state_id": "S3",
+      "reason": "Milestone creates a deterministic harness that confirms at the protocol/byte level that HEAD responses incorrectly include a body, contrasting with GET behavior."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 4,
+      "state_id": "S5",
+      "reason": "Milestone implements the code change in the development server’s WSGI handler to suppress emitting body bytes for HEAD while keeping other methods’ behavior intact."
+    },
+    {
+      "traj_index": 1,
+      "milestone_id": 5,
+      "state_id": "S7",
+      "reason": "Milestone validates the fix via targeted scripts (including generator/streaming cases) and runs Django test suites to confirm RFC-compliant HEAD behavior and lack of regressions."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 1,
+      "state_id": "S1",
+      "reason": "Milestone focuses on locating the runserver dev-server module/handler responsible for writing WSGI response bytes (via inspecting wsgiref finish_response) and scoping where body bytes are emitted."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 2,
+      "state_id": "S5",
+      "reason": "An initial code change is implemented in the server handler to special-case HEAD by skipping body writing while attempting to preserve headers/finalization, which matches 'fix implemented' (even if not yet correct for all edge cases)."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 3,
+      "state_id": "S5",
+      "reason": "This is a failed validation attempt that reveals the initial implementation is incomplete for generator/delayed start_response; per error-milestone rule the capability remains at the prior implemented-fix stage."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 4,
+      "state_id": "S2",
+      "reason": "The work centers on understanding wsgiref response finalization semantics (write/send_headers/finish_content/close) and identifying the correct interception/lifecycle point for HEAD without breaking header emission or close/error behavior."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 5,
+      "state_id": "S6",
+      "reason": "Edge-case handling is added for generator/delayed start_response by consuming the iterator without writing body bytes, ensuring headers are produced and the iterable is closed cleanly—meeting the HEAD edge-case criteria."
+    },
+    {
+      "traj_index": 2,
+      "milestone_id": 6,
+      "state_id": "S7",
+      "reason": "Fix is validated via targeted scripts, integration with the actual dev WSGI server, and relevant Django test suites, demonstrating compliant HEAD behavior and no regressions."
+    }
+  ],
+  "removed_states": [
+    {
+      "state_id": "S4",
+      "description": "A concrete implementation strategy is established to suppress HEAD response bodies while still ensuring correct headers are generated and sent (including Content-Length behavior).",
+      "type": "normal",
+      "reason": "defined by state generator but no milestone mapped to it"
+    }
+  ]
+}

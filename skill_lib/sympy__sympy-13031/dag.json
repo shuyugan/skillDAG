@@ -1,0 +1,181 @@
+{
+  "instance_id": "sympy__sympy-13031",
+  "skill_name": "Fix zero-dimension join regressions",
+  "description": "Addresses regressions where combining/concatenating structured containers (e.g., matrices, tables, tensors) produces incorrect shapes when one or more operands have zero rows/columns (or other empty dimensions). Apply when behavior differs across implementations (dense vs sparse, mutable vs immutable) or changes across versions, especially when emptiness shortcuts drop dimension information.",
+  "trigger_conditions": [
+    "A concatenate/stack/join operation returns an incorrect shape only when one or more inputs have a zero-size dimension (e.g., 0 rows or 0 columns)",
+    "The same operation behaves correctly for nonzero dimensions but fails for all-zero or partially-zero shapes",
+    "Different concrete implementations of the same abstraction (e.g., dense vs sparse) disagree on results for the same inputs",
+    "The failure appears after a version/implementation change and suggests an emptiness/truthiness shortcut is being taken"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "A minimal reproduction for the reported zero-dimension join/stack behavior has been executed, and the observed vs expected result has been recorded.",
+      "type": "intermediate",
+      "verification": [
+        "A short, standalone snippet reliably demonstrates the incorrect output and the expected output (e.g., printed shapes or equivalent metadata) for the problematic inputs",
+        "The runtime/library version or code checkout used for the observation has been identified so results are attributable to a specific build"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The code locations responsible for high-level stacking/concatenation and the underlying pairwise join operations have been identified, including which lower-level method(s) are ultimately used to compose results.",
+      "type": "intermediate",
+      "verification": [
+        "The entry points for the public stacking/concatenation API and the underlying join/merge implementation can be located in the source",
+        "The call chain from the public API to the lower-level operation (e.g., reducer calling pairwise join) has been traced well enough to know where to patch"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The intended semantics for joining zero-dimension inputs have been confirmed from a baseline behavior and/or existing automated checks, including at least one path that already behaves correctly.",
+      "type": "intermediate",
+      "verification": [
+        "An existing automated check (test) or an equivalent assertion has been found or created that encodes the intended outcome for the zero-dimension join/stack case",
+        "At least one implementation/path (e.g., a reference implementation) has been verified to produce the intended result for the same or closely related inputs"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "The incorrect behavior has been isolated to a specific implementation variant whose join/stack logic diverges from the correct/reference behavior.",
+      "type": "intermediate",
+      "verification": [
+        "Comparative reproduction across multiple implementations shows that only a subset produces the incorrect result for the same inputs",
+        "The specific component (class/module) responsible for the divergent behavior has been identified as the patch target"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "The root cause has been identified as an emptiness/shortcut branch in join logic that incorrectly treats zero-dimension objects as fully empty, causing loss of accumulated dimension information during composition.",
+      "type": "intermediate",
+      "verification": [
+        "The exact conditional/branch responsible for the incorrect behavior has been pinpointed and its misclassification of zero-dimension shapes can be explained",
+        "A clear causal explanation exists linking the faulty branch to the final incorrect joined/stacked dimensions (e.g., dimensions not accumulated or replaced during reduction)"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "A code change has been implemented that makes empty-dimension handling shape-aware and consistent across implementations, while preserving correct errors for incompatible joins.",
+      "type": "intermediate",
+      "verification": [
+        "The implementation no longer relies on broad truthiness/emptiness checks that collapse all zero-element cases; it uses dimension-aware conditions that preserve shape contributions",
+        "Existing incompatibility checks still behave correctly (e.g., mismatched dimensions continue to raise or fail as intended)"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The change has been validated with targeted reproductions and relevant automated checks covering the modified join/stack paths, confirming the regression is fixed without introducing new failures in the exercised scope.",
+      "type": "terminal",
+      "verification": [
+        "The original reproduction now produces the intended results for the previously failing implementation, including key zero-dimension edge cases",
+        "Relevant automated checks for the affected subsystem have been executed (via any available runner) and pass for the modified code paths"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the failure is reproducible, locating the responsible code path is necessary to determine whether the issue lives in the public API, a shared helper, or an implementation-specific override.",
+      "actions": "Navigate from the public stacking/concatenation API to the underlying pairwise join/merge operations by reading source and following the call chain; identify where shape metadata is computed and where special-casing for empty inputs occurs.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Before patching, the intended behavior must be established so the fix targets the correct semantics and avoids matching a misinterpretation of the expected result.",
+      "actions": "Compare observed behavior against a known-good path or reference implementation; search for existing regression checks or encode the expectation in a focused assertion; if a full test runner is unavailable, execute the relevant checks through alternative means.",
+      "errors": [
+        "The primary test runner was unavailable in the environment, requiring an alternative approach such as invoking targeted test functions directly or using an internal test harness."
+      ]
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "If the baseline/reference path is correct, the discrepancy likely comes from an alternate implementation that overrides the join logic; isolating which variant diverges narrows the patch to the right component.",
+      "actions": "Run the same minimal reproduction across multiple concrete implementations/representations; identify which one(s) disagree with the confirmed semantics and enumerate the overridden methods involved in joining/stacking.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "When the expected semantics are known, it can be faster to jump directly to diagnosing the failing join logic by comparing it against the correct/reference logic, especially around empty/zero-dimension handling.",
+      "actions": "Inspect the join/merge implementation for the failing case and compare it to the reference implementation’s behavior; focus on branches that special-case empty inputs or return early, and reason about how those branches affect dimension accumulation.",
+      "errors": [
+        "The preferred test runner was unavailable, so validation of expectations and behavior had to be done through direct execution of targeted checks."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After isolating the failing implementation, identifying the precise conditional that mishandles zero-dimension shapes enables a minimal change that restores consistent semantics without altering unrelated behavior.",
+      "actions": "Trace the failing implementation’s join/merge flow for the zero-dimension inputs; identify any truthiness/emptiness checks that conflate 'no stored elements' with 'no dimensions'; confirm how the early return or shortcut drops required shape information.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "With root cause understood, the fix should align the failing implementation’s empty-dimension semantics with the reference behavior by using shape-aware conditions rather than broad emptiness shortcuts.",
+      "actions": "Modify the join/merge methods to handle zero-dimension operands via explicit dimension checks (e.g., zero rows vs zero columns) and to preserve accumulated dimensions during repeated joins; keep incompatibility checks intact; adjust or remove overly broad early-return logic that discards shape.",
+      "errors": [
+        "An attempted automated edit did not apply because the pattern did not match the file contents as expected, requiring a more targeted edit approach and verification that the changes were actually written."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After implementation, correctness must be demonstrated both on the original reproducer and on broader checks to ensure the change doesn’t break normal joins or error handling.",
+      "actions": "Re-run the original reproduction plus representative edge cases (normal joins, zero-dimension joins, and incompatible-dimension joins that should fail); run the most relevant available automated checks for the affected subsystem using any working test entry point; distinguish unrelated pre-existing failures from regressions caused by the patch.",
+      "errors": [
+        "The broader test suite reported a pre-existing failure or deprecation issue unrelated to the join/stack change, requiring focusing on relevant test coverage for the modified area.",
+        "Standard CLI test entry points were unavailable in the environment, so tests had to be run through an alternate in-process or library-provided test harness.",
+        "Both the usual external test runner and a specific internal runner were unavailable, requiring switching to an alternative test execution method that was supported in the environment."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Establishing a working reproduction environment is prerequisite; path or workspace assumptions often fail, so locating the correct project root ensures subsequent commands and imports operate on the intended code.",
+      "actions": "Find the correct project/workspace directory, ensure the intended code version is being executed, and run the minimal reproduction from that environment to capture the incorrect behavior.",
+      "errors": [
+        "An assumed project directory path did not exist, requiring discovery of the actual repository/workspace location before running the reproduction."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "__START__",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "In some cases, it is efficient to combine initial reproduction with immediate codebase navigation to identify where the relevant operations are implemented, as long as the failing inputs/outputs are clearly captured.",
+      "actions": "Run a minimal reproduction and then inspect the source tree to locate the stacking/concatenation API and underlying join logic; follow contribution and editing constraints by executing one well-scoped command/action at a time.",
+      "errors": [
+        "A command was rejected because multiple actions were bundled into a single step, requiring separation into individual, well-scoped actions.",
+        "An initial attempt bundled multiple operations into one step and failed under the execution constraints, requiring commands to be reissued separately.",
+        "The first attempt combined an invalid multi-action execution format with an incorrect assumed project path, requiring both the format and the working directory to be corrected."
+      ]
+    }
+  ]
+}

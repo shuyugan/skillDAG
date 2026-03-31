@@ -1,0 +1,213 @@
+{
+  "instance_id": "sympy__sympy-13877",
+  "skill_name": "Fix symbolic algorithm NaN/crash",
+  "description": "Diagnose and repair failures in symbolic/numeric computation routines where intermediate results become NaN/invalid or trigger comparison/type errors due to incorrect simplification, pivoting, or exceptional-case handling. Apply this when a core math/linear-algebra routine returns NaN unexpectedly or crashes on valid symbolic inputs.",
+  "trigger_conditions": [
+    "A deterministic computation sometimes returns NaN/Infinity or crashes with a type/comparison error on symbolic or mixed symbolic-numeric inputs",
+    "A divide-by-zero/invalid-pivot or “invalid comparison” exception appears deep inside simplification/canonicalization code during an algorithm’s intermediate steps",
+    "An algorithm relies on intermediate simplification/exact-division, and incorrect or missing simplification is suspected to corrupt later pivots/branches",
+    "An alternate algorithm exists that can compute the same result more robustly, suggesting a fallback strategy for exceptional cases"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The implementation locations for the public entry point and the internal algorithm routine involved in the failure have been identified and traced through the call chain.",
+      "type": "intermediate",
+      "verification": [
+        "The concrete source locations for the public API entry point and the internal algorithm implementation used by the failing call path have been located",
+        "The path from the public API to the internal update step that constructs intermediate results has been traced and can be revisited for edits"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The failure has been reproduced reliably with a minimal, self-contained example and the incorrect outputs/exceptions have been confirmed.",
+      "type": "intermediate",
+      "verification": [
+        "Running a minimal script reliably produces the unexpected NaN/invalid result and/or the reported exception",
+        "The reproducer does not depend on unrelated harness setup and can be used repeatedly during debugging"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The algorithm execution flow for the reproducer has been understood, including method selection and the specific intermediate steps where pivots/division/simplification occur.",
+      "type": "intermediate",
+      "verification": [
+        "The reason the failing algorithm/method is selected for the input is understood (or the dispatch logic responsible for choosing it has been identified)",
+        "The step where invalid values are introduced or where downstream invalid comparisons are triggered has been localized to a specific stage in the intermediate computation"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "A concrete root cause has been identified in the algorithm’s intermediate computation, where an intended simplification/canonicalization operation was invoked but its result was not applied, allowing invalid values to propagate.",
+      "type": "intermediate",
+      "verification": [
+        "A specific operation has been identified where a simplification/canonicalization function is called but its returned simplified value is not actually used",
+        "A causal explanation connects the unused simplification result to later invalid values (e.g., spurious nonzero pivots, division issues, NaN propagation) and to the final exception/incorrect output"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "A targeted code change has been implemented so the intended simplification/canonicalization result is applied to the intermediate expression, preventing propagation of invalid values.",
+      "type": "intermediate",
+      "verification": [
+        "A code diff exists showing the intermediate expression is updated/replaced with the simplification/canonicalization result instead of discarding it",
+        "The change is localized to the algorithm’s intermediate update step and is syntactically and semantically consistent with surrounding logic"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "A robustness strategy has been implemented so that exceptional symbolic cases do not crash the computation, including catching algorithm-specific failures and falling back to an alternate method when necessary.",
+      "type": "intermediate",
+      "verification": [
+        "Failures from the primary algorithm are handled so that the public API returns a computed result by switching to an alternate algorithm when appropriate",
+        "Previously crashing inputs no longer raise exceptions through the public API and instead produce a non-error result"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The fix has been validated on the original reproducer and additional sanity/regression checks, confirming correct behavior and no new breakage.",
+      "type": "terminal",
+      "verification": [
+        "Re-running the original reproducer no longer produces NaN/invalid results and no longer raises the prior exception",
+        "Representative tests or targeted sanity checks pass, and any unrelated failures are confirmed to be pre-existing and unchanged"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "After locating the relevant implementation, the next step is to confirm the issue can be reproduced reliably so that changes can be evaluated quickly and confidently.",
+      "actions": "Create or run a small self-contained script that exercises the public API with the problematic input pattern; record the incorrect outputs and the exact exception trace for later comparison.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Once the code locations are known, understanding how the implementation selects and runs the underlying algorithm helps narrow where invalid intermediate states might be introduced.",
+      "actions": "Trace the call path from the public API into the selected algorithm; identify dispatch/selection logic and the internal update steps that compute intermediate values such as pivots, divisions, and simplifications.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S1",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "In some cases, inspection immediately reveals a local misuse of a helper (e.g., ignoring a return value), allowing a direct implementation of the fix without deeper flow analysis.",
+      "actions": "Review the internal update step for places where transformation/simplification helpers are called; ensure any function returning a transformed expression has its result stored and used in subsequent computations.",
+      "errors": [
+        "Attempted to reference source locations based on an assumed environment layout, but the expected files were not present.",
+        "Assumed an import/module path that did not exist in the current codebase layout, requiring re-discovery of the actual implementation location."
+      ]
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "With a reliable reproducer in hand, stepping through the algorithm clarifies which intermediate operation introduces invalid values and distinguishes symptoms (e.g., pivoting issues) from the true underlying bug.",
+      "actions": "Instrument or reason through the algorithm’s intermediate computations for the reproducer; compare with an alternate method if available to understand expected behavior; localize the stage where invalid values first appear.",
+      "errors": [
+        "Initially focused on a plausible symptom (e.g., problematic pivots or division) rather than the actual underlying cause (e.g., a simplification result not being applied)."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "From the reproduced failure, a focused root-cause analysis can identify a concrete, minimal defect responsible for invalid value propagation.",
+      "actions": "Manually trace intermediate expressions and check where simplification/canonicalization is expected; verify whether transformations are applied or inadvertently discarded; connect that defect to later NaN/invalid behavior.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S2",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "If the primary algorithm is brittle for some symbolic cases, evaluating an alternate algorithm provides a robust escape hatch to prevent crashes and produce a correct result.",
+      "actions": "Identify and test an alternative computation method for the same result; characterize when the primary method fails (exceptions or invalid outputs) and design conditions to switch to the alternative.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S3",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "After understanding the algorithm flow, re-running the reproducer confirms the diagnosis matches observed behavior and provides a baseline before applying any code changes.",
+      "actions": "Re-execute the minimal reproducer and any small variations while observing intermediate or final behavior; confirm the same failure mode occurs consistently under the analyzed path.",
+      "errors": []
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S3",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Once the problematic stage is identified, isolating the exact defective line/operation (e.g., discarded simplification return) enables a minimal, high-confidence correction.",
+      "actions": "Pinpoint the internal statement where a transformation/simplification return value is ignored; verify that using the returned value would change intermediate expressions in the needed way (e.g., recognizing algebraic zeros).",
+      "errors": []
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After establishing the specific defect, the fix should be implemented directly at the source of invalid intermediate values to prevent downstream NaN and exceptions.",
+      "actions": "Modify the algorithm’s intermediate update step to assign and use the result of the simplification/canonicalization operation; keep the change minimal and consistent with the algorithm’s intended invariants.",
+      "errors": []
+    },
+    {
+      "edge_id": 10,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Even with the primary defect fixed, additional safeguards may be needed so the public API remains reliable when the primary algorithm still encounters exceptional symbolic cases.",
+      "actions": "Add structured error handling around the primary algorithm execution; when it fails, invoke an alternate algorithm; optionally detect clearly-invalid outputs and recompute via the fallback method.",
+      "errors": []
+    },
+    {
+      "edge_id": 11,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After implementing the primary fix, validation ensures the original issue is resolved and that determinant-like computations still behave correctly in typical scenarios.",
+      "actions": "Re-run the reproducer and a suite of targeted sanity checks; compare against known-correct results for small cases; run available focused tests for the affected module; adjust validation strategy if full test tooling is unavailable.",
+      "errors": [
+        "Attempted a heavy cross-method comparison that was too slow due to expensive simplification; validation was continued using lighter, focused checks.",
+        "Expected test tooling was not available in the environment, requiring use of an alternative built-in test runner or direct targeted test execution."
+      ]
+    },
+    {
+      "edge_id": 12,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "When robustness/fallback behavior is added, validation must cover both the normal path and the fallback path to ensure crashes are eliminated without changing correct results unexpectedly.",
+      "actions": "Re-run the reproducer and additional representative inputs; verify the computation succeeds without exceptions; confirm results are sensible and that the fallback triggers only when necessary; run targeted tests for both code paths.",
+      "errors": [
+        "Standard test tooling was unavailable in the environment, so validation required using an alternative test runner and/or direct targeted test calls."
+      ]
+    },
+    {
+      "edge_id": 13,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "To begin debugging an exception trace or incorrect result, the relevant implementation must be located and the internal call chain identified so subsequent reproduction and fixes target the correct code.",
+      "actions": "Search the codebase for the public API entry point indicated by the traceback; follow calls into internal routines; open and inspect the algorithm implementation sections responsible for intermediate updates and method dispatch.",
+      "errors": [
+        "Attempted to run multiple commands in a single step when the environment expected a single command wrapper."
+      ]
+    }
+  ]
+}

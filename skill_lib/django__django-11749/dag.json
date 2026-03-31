@@ -1,0 +1,191 @@
+{
+  "instance_id": "django__django-11749",
+  "skill_name": "Fix kwarg-to-CLI parsing gaps",
+  "description": "Addresses bugs where programmatic invocation of a CLI-style command (passing structured keyword options) does not behave the same as invoking the command with equivalent command-line strings. Apply when an option parser enforces constraints (e.g., required groups, mutual exclusion) but the invocation layer only forwards a subset of provided options into parsing/validation.",
+  "trigger_conditions": [
+    "A command succeeds when called with CLI-style option strings but fails when called with equivalent keyword/structured options",
+    "The error indicates missing required options or group constraints despite the caller providing values programmatically",
+    "The invocation helper constructs a synthetic argv/parse list and conditionally includes options (e.g., based on per-option required flags)",
+    "Options are part of higher-level constraints (mutual exclusion groups, conditional requirements) not represented on individual option metadata"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The command invocation layer’s option-forwarding logic has been located, and the filtering/argv-construction step that likely drops provided keyword options has been identified.",
+      "type": "intermediate",
+      "verification": [
+        "The exact code path that converts positional/keyword inputs into an argv-like list for the option parser has been pinpointed.",
+        "The current forwarding rule has been characterized (e.g., only options marked individually required are forwarded from keywords), including why that can omit provided options."
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The failure has been reproduced with a minimal command that uses a required mutually exclusive option group, showing that keyword invocation fails while equivalent CLI-style invocation succeeds.",
+      "type": "intermediate",
+      "verification": [
+        "A minimal command with a required mutually exclusive group fails when invoked via programmatic keywords, emitting a \"one of these arguments is required\"-style error.",
+        "The same command succeeds when invoked via equivalent CLI-style option strings passed through the same invocation helper."
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The root cause has been confirmed: group-level requirements are not represented by per-option required flags, so keyword-provided options within required groups are not forwarded into parser validation.",
+      "type": "intermediate",
+      "verification": [
+        "It is confirmed that a required group constraint does not automatically set each member option to individually required in the underlying parser model.",
+        "It is explained how the invocation helper’s per-option required filtering causes provided keyword options inside required groups to be skipped, triggering false missing-required errors."
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "A targeted fix has been implemented so the invocation helper forwards keyword-provided options that belong to required mutually exclusive groups into the argv/parse list used by the option parser.",
+      "type": "intermediate",
+      "verification": [
+        "The updated logic inspects required mutually exclusive groups (or equivalent group metadata) and includes any provided group-member options in the synthesized argv/parse input.",
+        "The change is confined to the argument preparation/parsing portion of the invocation helper and does not alter unrelated command execution behavior."
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "Correct behavior has been validated for key scenarios: each group member works when passed via keywords, missing the group still fails, and providing multiple members still triggers mutual-exclusion validation.",
+      "type": "intermediate",
+      "verification": [
+        "Providing exactly one group-member option via keyword inputs now passes parsing and reaches command execution for each alternative member.",
+        "Providing neither member still raises a required-group error, and providing multiple members still raises a mutual-exclusion error."
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "Regression confidence has been established by running relevant existing automated tests (or an equivalent suite) covering command invocation and option parsing behavior.",
+      "type": "intermediate",
+      "verification": [
+        "At least one relevant existing test suite/module for command invocation and option parsing completes successfully after the change.",
+        "No new failures are introduced in areas related to argument parsing, command discovery/dispatch, or invocation helpers."
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "The patch has been finalized for submission with a clean working tree: only intended source changes (and any accepted tests) remain, with temporary reproduction artifacts removed.",
+      "type": "terminal",
+      "verification": [
+        "The diff/working tree contains only the intended fix (and any accepted tests) and no ad-hoc reproduction scripts or debug artifacts.",
+        "The final code has been reviewed for clarity and maintainability (no dead code, consistent style, logically placed changes)."
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "A concrete, minimal reproduction makes the discrepancy between keyword invocation and CLI-style invocation undeniable and provides a reliable harness to validate the eventual fix.",
+      "actions": "Create a small command that defines a required mutually exclusive group (or analogous grouped constraint), invoke it through the programmatic helper using both keyword options and equivalent CLI-style strings, and capture the differing outcomes.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "Understanding how the underlying option parser represents group-level constraints is necessary to confirm whether the invocation helper’s forwarding rules can correctly detect group-requiredness.",
+      "actions": "Inspect or probe the option parser’s internal representation for mutually exclusive groups and their member actions/options, comparing group-level required flags to per-option required flags and available metadata needed for forwarding decisions.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S1",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Once the forwarding bottleneck is known, implementing the fix directly can be faster than expanding investigation, provided the change is localized and aligns with the parser’s constraint model.",
+      "actions": "Augment the argv/parse-list construction to also consider required group membership: if a required mutually exclusive group exists, ensure that any provided keyword options corresponding to its members are included in the parser input so constraint validation sees them.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "With a reproduction in hand, iterating on an implementation is straightforward; if an automated patch application fails, apply the change manually while preserving intent and minimizing scope.",
+      "actions": "Update the invocation helper to forward keyword options for required-group members into the parser input; if a patch file cannot be applied cleanly, re-implement the same logical changes by editing the source directly and re-checking placement and syntax.",
+      "errors": [
+        "Applying an automated patch failed due to a malformed or incompatible patch (e.g., reported as a corrupt patch), requiring manual application of the intended changes."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S3",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Even after confirming the conceptual root cause, a stable failing test case is essential to prevent regressions and to verify that the fix truly addresses the reported behavior.",
+      "actions": "Write and run a minimal standalone reproduction that exercises both invocation styles and clearly demonstrates the failure mode attributable to the group-required constraint not being satisfied under keyword forwarding.",
+      "errors": []
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After implementing the fix, validation must ensure both the reported bug is resolved and the parser’s original constraint semantics (requiredness and exclusivity) remain intact across edge cases.",
+      "actions": "Re-run the reproduction and extend it to cover: each mutually exclusive alternative via keywords, neither provided, multiple provided, and any nearby scenarios (optional groups, normal required options) that could be impacted by the forwarding change.",
+      "errors": [
+        "The temporary test command was not discoverable by the command loader/registry, causing an 'unknown command' error when invoked by name."
+      ]
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "Project-level tests provide broader assurance that the change doesn’t subtly break other invocation or parsing behaviors beyond the local reproduction.",
+      "actions": "Run the most relevant existing automated tests for command execution and argument parsing; if tooling or labels differ from expectations, adjust to the project’s supported test runner and correct test selection until a representative suite completes.",
+      "errors": [
+        "An attempted test target/label did not exist, requiring selection of the correct test suite or module.",
+        "The preferred test runner was unavailable in the environment, requiring use of the project’s standard test runner instead.",
+        "A test run initially failed due to misconfigured or incorrect test settings and succeeded only after correcting the configuration.",
+        "A broader or slower test suite timed out, requiring running a narrower but relevant subset that completes in the available environment."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "If core scenarios are validated and at least some relevant tests pass, the work can be wrapped up by ensuring the patch is clean, minimal, and ready for review even if a very large suite is impractical to run end-to-end.",
+      "actions": "Run available relevant tests, prioritize those closest to the changed code, then remove any temporary reproduction artifacts and verify the remaining diff contains only the intended fix (and any accepted tests).",
+      "errors": [
+        "A larger integration-style test suite timed out and was killed, while a smaller relevant suite completed successfully.",
+        "Initial test attempts used incorrect module/label references, resulting in import or discovery errors before switching to the correct targets."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Final review and cleanup ensures the change is presentable and reduces reviewer burden by eliminating noise and ensuring only intended modifications are included.",
+      "actions": "Perform a final diff review for scope and readability, remove scratch/reproduction files, and (optionally) rerun a quick relevant test subset if time permits to confirm nothing regressed during cleanup.",
+      "errors": [
+        "A broader test suite timed out and was killed, so final validation relied on a narrower relevant suite plus code review."
+      ]
+    },
+    {
+      "edge_id": 10,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before reproducing or fixing, the invocation-to-parser boundary must be understood so effort is focused on the logic that synthesizes parser input from structured options.",
+      "actions": "Locate the command invocation helper and trace how it builds the parser input from positional arguments and keyword options, noting any conditional forwarding rules and how option metadata is discovered from the parser.",
+      "errors": [
+        "Attempting to display an entire large source file produced too much output to be useful, so inspection needed to be narrowed to the relevant section.",
+        "An initial execution attempt bundled multiple operations together and had to be retried as a single focused action due to environment or harness constraints."
+      ]
+    }
+  ]
+}

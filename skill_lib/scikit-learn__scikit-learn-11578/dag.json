@@ -1,0 +1,181 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-11578",
+  "skill_name": "Propagate Configuration in Scoring Helpers",
+  "description": "Use this workflow when cross-validation or evaluation code constructs a temporary estimator/model for scoring and the resulting metrics do not reflect the caller’s intended configuration. It helps identify parameter-propagation gaps, implement a minimal fix, and validate the corrected scoring behavior through reproductions and tests.",
+  "trigger_conditions": [
+    "A probability-based (or otherwise method-dependent) metric differs between a direct model evaluation and a cross-validated/evaluation helper path",
+    "A helper constructs an internal/temporary estimator for scoring instead of reusing the already-configured estimator instance",
+    "A behavior switch controlled by a configuration flag (e.g., probability computation mode) appears to be ignored during scoring",
+    "Scores change depending on which prediction method is implicitly used by the scorer (e.g., probability vs decision values), suggesting mismatched estimator configuration"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The evaluation/scoring helper and the internal construction site of the temporary estimator used for scoring have been located and understood.",
+      "type": "intermediate",
+      "verification": [
+        "The specific helper/function responsible for computing scores across a parameter path or cross-validation has been identified, along with the exact point where a temporary estimator is instantiated and where scoring is invoked",
+        "It is clear which estimator instance is passed to the scoring callable and which prediction interface(s) the scorer will rely on (e.g., probability estimates versus decision scores)"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The root cause has been confirmed as a missing or inconsistent propagation of configuration into the scoring-time estimator, changing the scoring behavior.",
+      "type": "intermediate",
+      "verification": [
+        "It has been shown that the temporary estimator used for scoring is created with a default configuration value even though the caller requested a different mode",
+        "The mismatch has been connected to a concrete difference in how predictions used for scoring are computed (e.g., different probability-mapping strategy), explaining the metric discrepancy"
+      ]
+    },
+    {
+      "node_id": "S3",
+      "state": "The mechanism by which the affected configuration flag changes prediction outputs has been traced and validated for the prediction method used by the scorer.",
+      "type": "intermediate",
+      "verification": [
+        "The implementation (or an equivalent minimal experiment) demonstrates that the prediction method used by the scorer changes behavior based on the configuration flag in the multi-class (or multi-mode) setting",
+        "It has been justified that setting the configuration on the scoring-time estimator will affect scorer outputs without requiring retraining, given that the helper populates model parameters/state directly"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "The fix has been implemented by ensuring the scoring-time estimator inherits the caller-requested configuration relevant to the scorer’s prediction method.",
+      "type": "intermediate",
+      "verification": [
+        "The temporary estimator created inside the scoring helper now receives the configuration flag(s) from the helper’s inputs (or an equivalent propagation mechanism) rather than relying on defaults",
+        "Source inspection or a minimal diff confirms the scoring path no longer silently uses a default mode when computing predictions for scoring"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "The fix has been validated with a minimal reproduction showing the helper’s score aligns with the expected prediction-to-metric computation for the requested mode.",
+      "type": "intermediate",
+      "verification": [
+        "A reproduction script (or equivalent check) shows the helper’s returned score matches the metric computed from the expected prediction transformation when the requested mode is enabled",
+        "The pre-fix discrepancy (scores matching the unintended default-mode computation) no longer appears after the patch"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "Correct behavior has been confirmed across supported modes using realistic entry points and respecting any mode-specific invocation requirements.",
+      "type": "intermediate",
+      "verification": [
+        "Both modes (e.g., alternative multi-class strategies) have been exercised through the intended public API or typical caller pathway with a method-dependent scorer, producing consistent and expected results",
+        "Any mode-specific required inputs or constraints for the helper have been satisfied and treated as expected usage requirements rather than regressions"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "Regression safety has been established by running relevant automated tests and an end-to-end fit-and-score scenario that covers the repaired scoring pathway.",
+      "type": "terminal",
+      "verification": [
+        "The relevant unit/integration test subset for the affected estimator and scoring pathway passes with the change applied",
+        "An end-to-end cross-validated fit/score run using a method-dependent scorer completes successfully and produces scores consistent with the requested configuration"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "After locating the scoring helper, the next step is to compare the helper’s accepted inputs with what is actually passed into the temporary estimator used for scoring to determine whether configuration is being dropped.",
+      "actions": "Inspect the helper’s signature and internal estimator construction; compare caller-provided options to constructor arguments used for the scoring-time estimator; confirm what configuration values the scoring-time estimator ends up with at runtime.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S1",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "Once the scoring estimator construction point is known, a direct targeted patch can be applied to propagate the missing configuration into the scoring-time estimator, even before fully characterizing the deeper mechanism, to quickly test the hypothesis.",
+      "actions": "Modify the scoring helper so the temporary estimator is constructed with the relevant caller-provided configuration options instead of defaults; keep the patch minimal and localized to the scoring-estimator construction.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "With the root cause identified as a propagation mismatch, the appropriate fix is to pass the missing configuration through when constructing the temporary estimator used by the scorer.",
+      "actions": "Update the scoring-time estimator initialization to include the missing mode/configuration flag from the helper inputs; ensure the propagated value matches the caller’s requested setting and is used consistently for scoring.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S3",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After understanding how the configuration influences prediction outputs, the fix should be validated by comparing the helper’s metric against a manual computation derived from the expected prediction behavior.",
+      "actions": "Run a minimal reproduction that computes the metric two ways: (1) via the helper and (2) via manually derived predictions consistent with the requested configuration; confirm alignment and rule out accidental agreement with the default mode.",
+      "errors": []
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S4",
+      "to_node": "S3",
+      "type": "normal",
+      "thought": "After implementing the propagation change, it is important to confirm the scorer’s prediction method actually uses that configuration flag and that no other validation or compatibility constraints will negate the change.",
+      "actions": "Read the prediction method used by the scorer to verify where and how it branches on configuration; confirm that setting the flag on an already-parameterized estimator affects outputs; consider whether any training-time checks would be bypassed or irrelevant in this scoring context.",
+      "errors": [
+        "A search for the relevant implementation initially returned no results due to an ineffective command/pipeline, requiring a simpler or more direct search approach."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "With the patch in place, the immediate next step is to rerun a focused reproduction to confirm the scoring discrepancy is resolved and the correct prediction-to-metric pathway is used.",
+      "actions": "Execute the reproduction or an equivalent targeted check that compares helper-produced scores against expected scores from the correct prediction mode; verify the fix changes the outcome in the expected direction and removes the prior mismatch.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "S5",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "After the minimal reproduction passes, broader validation is needed to ensure the change does not break other supported modes and that testing reflects real usage patterns and required arguments.",
+      "actions": "Validate both modes via the intended public API or typical call path; if directly calling lower-level helpers, provide all required mode-specific inputs; when a direct helper call fails due to missing required arguments, adjust the test to mirror how higher-level APIs invoke the helper.",
+      "errors": [
+        "A direct call to the scoring helper in an alternate mode failed because a required mode-specific argument was not provided (expected usage constraint).",
+        "An initial alternate-mode test omitted a required argument, causing a runtime error; the test approach was revised to match the real invocation pattern."
+      ]
+    },
+    {
+      "edge_id": 8,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Even if the fix works in the reproduction, automated tests and an end-to-end scenario are needed to ensure the change is safe, stable, and compatible with the library’s expected behaviors.",
+      "actions": "Run the relevant test suite subset for the affected estimator and scoring helper; perform an end-to-end cross-validated fit/score run using the method-dependent scorer to ensure the corrected pathway is exercised; review outputs for consistency with the requested configuration.",
+      "errors": [
+        "During an end-to-end run, non-fatal convergence or behavior-change warnings were observed while tests still passed."
+      ]
+    },
+    {
+      "edge_id": 9,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "After confirming correct behavior through realistic usage checks, the final confidence step is to rely on the project’s automated tests and a brief diff review to ensure no unintended side effects remain.",
+      "actions": "Execute the relevant unit/integration tests; recheck the final diff for minimal, targeted changes; remove any temporary validation artifacts and ensure the patch matches project conventions.",
+      "errors": []
+    },
+    {
+      "edge_id": 10,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "To address a scoring mismatch, the workflow begins by finding the exact evaluation helper and identifying where the scoring-time estimator is constructed and used, since that is where configuration can be lost.",
+      "actions": "Navigate from the reported metric discrepancy to the internal evaluation helper responsible for scoring; locate where it constructs any temporary estimator and calls the scoring function; map which parameters are accepted by the helper versus applied to the estimator.",
+      "errors": []
+    }
+  ]
+}

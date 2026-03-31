@@ -1,0 +1,150 @@
+{
+  "instance_id": "scikit-learn__scikit-learn-13135",
+  "skill_name": "Fix Non-Monotonic Derived Bins",
+  "description": "Applies when a transformation or discretization routine derives ordered thresholds (e.g., bin edges) from a model output (e.g., cluster centers) but downstream logic requires those thresholds to be monotonic. Use this workflow to reproduce the failure, trace the derivation path, enforce a deterministic ordering invariant, and validate via broader checks and automated tests.",
+  "trigger_conditions": [
+    "A downstream routine errors because an input array of thresholds/edges must be monotonically increasing or decreasing",
+    "Derived thresholds are computed from model outputs that are not guaranteed to be ordered (e.g., centroids, categories, quantiles from unstable steps)",
+    "The failure appears only for certain parameter regimes (e.g., many bins/clusters relative to unique values) or specific datasets",
+    "A data-to-bins mapping function behaves inconsistently or throws when presented with non-sorted boundaries"
+  ],
+  "nodes": [
+    {
+      "node_id": "S1",
+      "state": "The threshold/bin derivation code path for the affected strategy has been located and the data flow from learned parameters to derived boundaries is understood well enough to change safely.",
+      "type": "intermediate",
+      "verification": [
+        "The responsible module and code region where derived boundaries are computed has been identified",
+        "The path from fitted model outputs (e.g., centers/representatives) to the boundary array consumed by the transformation step has been traced and can be explained"
+      ]
+    },
+    {
+      "node_id": "S2",
+      "state": "The failure has been reproduced with a minimal example that demonstrates non-monotonic derived boundaries reaching the downstream mapping operation.",
+      "type": "intermediate",
+      "verification": [
+        "A small, standalone reproduction triggers the monotonicity-related exception in the transformation/mapping step",
+        "The derived boundary array (or its upstream source values) has been inspected and shown to be non-monotonic in the failing case"
+      ]
+    },
+    {
+      "node_id": "S4",
+      "state": "A code change has been implemented that guarantees derived boundaries are monotonic for the affected strategy by enforcing a deterministic ordering at the correct point in the derivation pipeline.",
+      "type": "intermediate",
+      "verification": [
+        "The implementation includes an explicit, deterministic ordering step on the upstream values used to derive boundaries before boundary computation",
+        "For the previously failing input, the derived boundary array is monotonic after the change"
+      ]
+    },
+    {
+      "node_id": "S5",
+      "state": "The original reproducer completes without the prior monotonicity exception and produces valid mapped outputs consistent with expected bounds.",
+      "type": "intermediate",
+      "verification": [
+        "Re-running the minimal reproducer completes the fit-and-transform (or equivalent) without raising the monotonicity exception",
+        "The produced discrete outputs are within the expected index/value range for the configured number of bins/classes"
+      ]
+    },
+    {
+      "node_id": "S6",
+      "state": "The change has been validated on representative configurations and edge cases beyond the minimal reproducer, confirming expected behavior and stability.",
+      "type": "intermediate",
+      "verification": [
+        "Ad-hoc validation succeeds across variations such as different bin counts, multi-column inputs, alternate output encodings, and round-trip operations (if supported)",
+        "Any convergence or degeneracy warnings observed under extreme parameter/data regimes do not prevent completion and outputs remain sensible"
+      ]
+    },
+    {
+      "node_id": "S7",
+      "state": "Relevant automated tests pass without regressions, indicating the change is compatible with existing expected behavior.",
+      "type": "terminal",
+      "verification": [
+        "The focused automated test suite for the affected component completes successfully",
+        "No new failures are introduced relative to the baseline when running the relevant tests"
+      ]
+    },
+    {
+      "node_id": "__START__",
+      "state": "Start",
+      "type": "start",
+      "verification": []
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": 1,
+      "from_node": "S1",
+      "to_node": "S2",
+      "type": "normal",
+      "thought": "Once the derivation path is understood, a minimal reproduction is needed to confirm the issue locally and to observe the exact invariant violation (non-monotonic boundaries) before modifying logic.",
+      "actions": "Create and run a small, deterministic input that exercises the suspect strategy and parameter regime; capture the exception and inspect/print the derived boundaries (and their upstream source values) to confirm they are not monotonic.",
+      "errors": []
+    },
+    {
+      "edge_id": 2,
+      "from_node": "S2",
+      "to_node": "S4",
+      "type": "normal",
+      "thought": "With a confirmed reproduction showing non-monotonic boundaries, the fix should enforce the ordering invariant at the source (upstream values) so all downstream computations and consumers receive valid monotonic boundaries.",
+      "actions": "Modify the boundary-derivation pipeline to impose deterministic ordering on the upstream derived values (e.g., sort representative values/centers) prior to computing boundaries; ensure the change occurs before the boundaries are passed to the downstream mapping step.",
+      "errors": []
+    },
+    {
+      "edge_id": 3,
+      "from_node": "S4",
+      "to_node": "S5",
+      "type": "normal",
+      "thought": "After implementing the invariant enforcement, the quickest proof of correctness is that the original reproducer no longer triggers the exception and yields valid outputs.",
+      "actions": "Re-run the minimal reproducer; verify the transformation completes, boundaries are monotonic, and mapped outputs fall within expected limits for the configured bin/class count.",
+      "errors": []
+    },
+    {
+      "edge_id": 4,
+      "from_node": "S4",
+      "to_node": "S6",
+      "type": "normal",
+      "thought": "A fix that resolves one reproducer can still break other configurations; broader spot checks help ensure the new ordering step does not introduce unintended behavior across common usage patterns and edge conditions.",
+      "actions": "Run additional manual validations across varying bin counts, different input shapes, alternate encodings, and any available inverse/round-trip operations; note and interpret any warnings arising from degenerate data/parameter combinations while ensuring the routine still completes.",
+      "errors": [
+        "A convergence/degeneracy warning occurred when the requested number of groups exceeded the number of distinct input values; execution still completed successfully."
+      ]
+    },
+    {
+      "edge_id": 5,
+      "from_node": "S5",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "Once the reproducer is fixed, automated tests are needed to guard against regressions and ensure compatibility with established expectations; benign convergence warnings may appear under extreme configurations and should not be confused with functional failures.",
+      "actions": "Execute the relevant automated test suite for the component; if warnings appear due to degenerate clustering/grouping conditions, confirm tests still pass and outputs remain within expected constraints.",
+      "errors": [
+        "A convergence/degeneracy warning appeared when the requested number of groups exceeded the number of distinct points; this was not a functional failure.",
+        "A benign convergence warning occurred because duplicate inputs reduced the effective number of distinct groups found.",
+        "A warning indicated fewer distinct groups were found than requested; execution and checks still succeeded."
+      ]
+    },
+    {
+      "edge_id": 6,
+      "from_node": "S6",
+      "to_node": "S7",
+      "type": "normal",
+      "thought": "If broader manual validation has been completed, the final gate is confirming the official automated tests for the affected area pass cleanly to demonstrate readiness for integration.",
+      "actions": "Run the focused automated tests covering the affected functionality and confirm they pass without introducing new failures compared to baseline.",
+      "errors": []
+    },
+    {
+      "edge_id": 7,
+      "from_node": "__START__",
+      "to_node": "S1",
+      "type": "normal",
+      "thought": "Before reproducing or fixing, the implementation must be located and understood to avoid patching the wrong layer and to ensure the ordering invariant is enforced at the appropriate point in the pipeline.",
+      "actions": "Navigate to the implementation responsible for the failing operation; inspect only the relevant sections by narrowing views to specific functions/regions, and trace how learned parameters are converted into derived boundaries consumed by the downstream mapping routine.",
+      "errors": [
+        "Attempted to display an entire large source artifact at once; the output was truncated due to excessive length.",
+        "A full-artifact view produced excessive output; inspection was switched to targeted sections.",
+        "Initial attempt to view the whole implementation produced too much output and required narrowing to specific regions.",
+        "A full listing was truncated; the approach was changed to viewing selected ranges instead.",
+        "Attempted to output the full artifact; truncation occurred and the view was narrowed to smaller sections."
+      ]
+    }
+  ]
+}

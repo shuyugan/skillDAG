@@ -1,0 +1,36 @@
+2026-03-18 05:31:32,874 INFO __main__: construct_from_scratch: 5 attempt dirs
+2026-03-18 05:31:32,876 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] milestone extraction started
+2026-03-18 05:31:48,927 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:31:48,936 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] extraction done: 5 milestones
+2026-03-18 05:31:48,938 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] milestone extraction started
+2026-03-18 05:32:05,817 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:05,819 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] extraction done: 5 milestones
+2026-03-18 05:32:05,821 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] milestone extraction started
+2026-03-18 05:32:15,656 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:15,658 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] extraction done: 4 milestones
+2026-03-18 05:32:15,663 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] milestone extraction started
+2026-03-18 05:32:26,165 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:26,167 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] extraction done: 5 milestones
+2026-03-18 05:32:26,169 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] milestone extraction started
+2026-03-18 05:32:37,325 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:37,327 INFO workspace_state.agents.trajectory_analyzer: [scikit-learn__scikit-learn-11310] extraction done: 6 milestones
+2026-03-18 05:32:37,327 INFO workspace_state.agents.state_canonicalizer: state canonicalization started: 5 trajectories
+2026-03-18 05:32:47,912 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:47,914 INFO workspace_state.agents.state_canonicalizer: step 2a done: 6 canonical states defined
+2026-03-18 05:32:52,496 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:52,502 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 0 mapped (5 milestones)
+2026-03-18 05:32:58,287 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:32:58,289 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 1 mapped (5 milestones)
+2026-03-18 05:33:02,495 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:33:02,496 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 2 mapped (4 milestones)
+2026-03-18 05:33:09,749 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:33:09,750 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 3 mapped (5 milestones)
+2026-03-18 05:33:16,157 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:33:16,158 INFO workspace_state.agents.state_canonicalizer: step 2b: trajectory 4 mapped (6 milestones)
+2026-03-18 05:33:16,159 INFO workspace_state.agents.state_canonicalizer: canonicalization done: 6 canonical states, 25 mappings
+2026-03-18 05:33:16,159 INFO workspace_state.agents.graph_builder: graph assembly started
+2026-03-18 05:33:16,164 INFO workspace_state.agents.graph_builder: graph assembly done: 7 nodes, 8 edges
+2026-03-18 05:33:16,167 INFO __main__: language generalization started
+2026-03-18 05:33:47,664 INFO httpx: HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-18 05:33:47,665 INFO __main__: generalization done: skill_name=Add Post-Selection Refit Timing
+2026-03-18 05:33:47,666 INFO __main__: skill saved to /space3/shuyu/project/skillDAG/workspace_state/skill_lib/scikit-learn__scikit-learn-11310
